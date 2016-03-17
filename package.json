@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/sidekickcode/sidekick-cli/issues"
   },
-  "homepage": "https://github.com/sidekickcode/sidekick-cli#readme"
+  "homepage": "https://github.com/sidekickcode/sidekick-cli#readme",
+  "dependencies": {
+    "sidekick-git-helpers": "^1.0.1"
+  }
 }

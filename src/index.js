@@ -26,34 +26,13 @@ exports.run = run;
 
 // safe lookup w/o proto
 const commands = Object.create(null);
-commands.prepush = require("./prepush");
-commands["pre-push"] = commands.prepush; // match the git hook
 commands.version = showVersion;
 commands.help = helpCommand;
 commands.run = require("./run");
 
-commands.open = require("./open");
-commands.init = require("./init");
-commands.config = commands.init;
-
-exports.open = require("./open");
-
 
 const help = 
 `usage: sk <command> [ arg, ... ]
-
-  sk open [ some/repo/path ]
-
-    opens sidekick GUI for repo, or current working directory if no path provided.
-
-  sk init [ some/repo/path ]
-
-    add a new repo to sidekick via the GUI, at path or current working directory if no
-    path provided
-
-  sk config [ some/repo/path ]
-
-    opens the config GUI for a repo, at path or current working directory if no path provided
 
   sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish (default: working copy) ] [ --reporter npmPackageName|absolutePath ] [ --no-ci-exit-code ]
 
@@ -75,14 +54,6 @@ const help =
   sk version
 
     reports the version (also sk -v sk --version)
-
-  ============ scripting API ============
-
-  usually only executed in hooks and scripts
-
-  pre-push   command used in git pre-push hooks to initiate sidekick
-             analysis. See in-app docs for usage
-
 
 sk version ${VERSION}`;
 
