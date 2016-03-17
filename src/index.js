@@ -1,0 +1,171 @@
+"use strict";
+
+// NOTE - do not require anything else before logs, to ensure all
+// logs go to correct place
+const settings = require("../../common/settings");
+
+const log = require("../../common/log");
+log.setPrefix(`[cli ${process.pid}] `);
+log.setLevel(0);
+
+if(!process.env.LOG_TO_STDOUT) {
+  log.setWriter(log.writeToPath(settings.cliLogPath()));
+}
+
+const yargs = require("yargs");
+const tracking = require("../../common/tracking");
+
+const userSettings = require("../../core/userSettings");
+userSettings.load();
+
+var Promise = require("bluebird");
+
+const VERSION = settings.version();
+
+exports.run = run;
+
+// safe lookup w/o proto
+const commands = Object.create(null);
+commands.prepush = require("./prepush");
+commands["pre-push"] = commands.prepush; // match the git hook
+commands.version = showVersion;
+commands.help = helpCommand;
+commands.run = require("./run");
+
+commands.open = require("./open");
+commands.init = require("./init");
+commands.config = commands.init;
+
+exports.open = require("./open");
+
+
+const help = 
+`usage: sk <command> [ arg, ... ]
+
+  sk open [ some/repo/path ]
+
+    opens sidekick GUI for repo, or current working directory if no path provided.
+
+  sk init [ some/repo/path ]
+
+    add a new repo to sidekick via the GUI, at path or current working directory if no
+    path provided
+
+  sk config [ some/repo/path ]
+
+    opens the config GUI for a repo, at path or current working directory if no path provided
+
+  sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish (default: working copy) ] [ --reporter npmPackageName|absolutePath ] [ --no-ci-exit-code ]
+
+    runs sk in cli mode, reporting results via reporter. will exit with status code 1 if any isues are detected - disable this with --no-ci-exit-code
+
+    without a --versus, simply analyses all files in the repo. with --versus compares current working copy (i.e the files
+    in the repo, commited or not) vs specified commit. With both --versus and --compare, will analyse changes
+    that have happened since the commit at versus, until the commit at compare.
+
+    sk run --versus origin/master                # working copy vs latest fetched commit from origin/master
+    sk run --versus head~5                       # working copy vs 5 commits ago
+    sk run --compare HEAD --versus head~5        # current commit vs 5 commits ago
+
+  sk help [ command ]
+  sk command -h --help
+
+    shows this dialog, or more detailed help on a command if available
+
+  sk version
+
+    reports the version (also sk -v sk --version)
+
+  ============ scripting API ============
+
+  usually only executed in hooks and scripts
+
+  pre-push   command used in git pre-push hooks to initiate sidekick
+             analysis. See in-app docs for usage
+
+
+sk version ${VERSION}`;
+
+function run() {
+  const cmd = yargs.argv._[0];
+  const fn = commands[cmd];
+
+  log.debug('\n**********************************************************************\n');
+
+  process.on("exit", function(code) {
+    log("exit " + code);
+  });
+
+  process.on("uncaughtException", handleUnexpectedException);
+
+  process.on("unhandledRejection", function(err) {
+    log.error("unhandled promise rejection! " + err.stack || err);
+    tracking.error(err);
+  });
+
+
+  if(typeof fn === "function") {
+    if(yargs.argv.h || yargs.argv.help) {
+      return helpCommand(yargs);
+    }
+
+    try {
+      fn(yargs);
+    } catch(e) {
+      handleUnexpectedException(e);
+      console.error("sk suffered an unexpected error");
+      process.exit(1);
+    }
+  } else {
+    if(yargs.argv.v || yargs.argv.version) {
+      showVersion();
+    } else {
+      failWithHelp(cmd);
+    }
+  }
+}
+
+function handleUnexpectedException(err) {
+  log.error("uncaughtException! " + err.stack || err);
+  tracking.error(err);
+}
+
+function showHelp() {
+  write(help);
+}
+
+function helpCommand(yargs) {
+  const argv = yargs.argv;
+  const cmd = argv._[1];
+  const command = commands[cmd];
+  if(command) {
+    if(command.help) {
+      write(command.help);
+    } else {
+      write(`there is no additional help for the '${cmd}' command beyond the below\n`);
+      failWithHelp(cmd);
+    }
+  } else {
+    showHelp();
+  }
+}
+
+function showVersion() {
+  write(`sidekick ${VERSION}`);
+}
+
+function failWithHelp(cmd) {
+  if(cmd) {
+    write(`'${cmd}' is not a sidekick command, see usage:\n`);
+  }
+  write(help);
+  process.exit(1);
+}
+
+if(require.main === module) {
+  run();
+}
+
+function write(m) {
+  console.log(m);
+}
