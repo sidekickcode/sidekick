@@ -1,16 +1,17 @@
 {
-  "name": "sidekick-cli",
-  "version": "0.0.1",
-  "description": "The CLI for Sidekick",
+  "name": "sidekick",
+  "version": "1.0.1",
+  "description": "Your code, made perfect.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sidekickcode/sidekick-cli.git"
+    "url": "git+https://github.com/sidekickcode/sidekick.git"
   },
   "keywords": [
+    "javascript",
     "lint",
     "quality",
     "static-analysis"
@@ -18,9 +19,9 @@
   "author": "",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/sidekickcode/sidekick-cli/issues"
+    "url": "https://github.com/sidekickcode/tracker/issues"
   },
-  "homepage": "https://github.com/sidekickcode/sidekick-cli#readme",
+  "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
     "sidekick-git-helpers": "^1.0.1"
   }

@@ -49,7 +49,17 @@ module.exports = exports = function(yargs) {
 
         exitOptionallySkipping(exit);
       } else {
-        return analyse(exitOrResult);
+        if(command.ci){
+          return runOnCi(repoPath)
+              .then(function() {
+                return analyse(exitOrResult)
+              }, function(err){
+                //ci install failed
+                return exitOrResult
+              });
+        } else {
+          return analyse(exitOrResult);
+        }
       }
     })
     .catch(fail);
@@ -89,6 +99,28 @@ module.exports = exports = function(yargs) {
         return `missing value for '--${name}'`;
       }
     }
+  }
+
+  /**
+   * Run on a CI server.
+   * Download and install all required analysers
+   * @param repoPath abs path to the repo
+   * @returns {*}
+   */
+  function runOnCi(repoPath){
+    var Installer = require('./analysers/installer');
+    var installer = new Installer(true);  //install in CI mode
+    installer.on('downloading', function(){});
+    installer.on('downloaded', function(){});
+    installer.on('installing', function(){});
+    installer.on('installed', function(){});
+    return installer.installAnalysers(repoPath)
+        .then(function(results){
+          //all analysers installed fine
+          //return list of analysers with their path, config..
+        }, function(err){
+          //problem installing at least 1 analyser
+        })
   }
 
   function analyse() {
@@ -196,6 +228,10 @@ function parseInput(yargs) {
     cmd.compare = argv.compare;
   }
 
+  if(argv.ci) {
+    cmd.ci = argv.ci;
+  }
+
   return cmd;
 }
 
@@ -220,22 +256,30 @@ function outputError(e) {
 
 
 exports.help = `
-usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --no-ci-exit-code ]
+usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --no-ci-exit-code ]
 
-    runs sk in cli mode, reporting results via reporter. will exit with status code 1 if any isues are detected - disable this with --no-ci-exit-code
+    Runs sk in cli mode, reporting results via reporter.
 
-    without a --versus, simply analyses all files in the repo. with --versus compares current working copy (i.e the files
+Compare and Versus
+
+    Without a --versus, simply analyses all files in the repo. with --versus compares current working copy (i.e the files
     in the repo, commited or not) vs specified commit. With both --versus and --compare, will analyse changes
     that have happened since the commit at versus, until the commit at compare.
 
-Examples
-
+  Examples
 
     sk run --versus origin/master                # working copy vs latest fetched commit from origin/master
     sk run --versus head~5                       # working copy vs 5 commits ago
     sk run --compare HEAD --versus head~5        # current commit vs 5 commits ago
 
+CI
+
+    With --ci flag, sk will install all analysers specified in your .sidekickrc file. If an analyser relies on a config
+    file, e.g. '.eslintrc', these settings will be used. If no config can be found then Sidekick default settings will be used.
+
 Reporters
+
+    Without --reporter, a summary reporter will be used that totals up the issues found.
 
     json-stream - a stream of newline deliminated JSON: http://ndjson.org
 
@@ -243,5 +287,9 @@ Reporters
 
     junit       - junit compatible XML. incremental results, emitting a <testcase> per analyser per file (i.e every (file, analyser) pair), with
                   <failure> elements per issue found.
+
+Exit code
+
+    Will exit with status code 1 if any issues are detected - disable this with --no-ci-exit-code
 
 `;
