@@ -1,6 +1,6 @@
 "use strict";
 
-const SAM = require('analyser-manager');
+const SAM = require('@sidekick/analyser-manager');
 const _ = require('lodash');
 const Promise = require('bluebird');
 

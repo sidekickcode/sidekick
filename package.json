@@ -4,7 +4,7 @@
   "description": "Your code, made perfect.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "exec mocha"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,16 @@
   },
   "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
+    "@sidekick/analyser-manager": "^1.0.4",
+    "bluebird": "^3.3.4",
+    "lodash": "^4.6.1",
     "sidekick-git-helpers": "^1.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
+    "fs-extra": "^0.26.7",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3"
   }
 }
