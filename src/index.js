@@ -2,25 +2,20 @@
 
 // NOTE - do not require anything else before logs, to ensure all
 // logs go to correct place
-const settings = require("../../common/settings");
+//const settings = require("../../common/settings");
+const VERSION = '1,10'; //  settings.version();
 
-const log = require("../../common/log");
+const log = require("@sidekick/common/log");
 log.setPrefix(`[cli ${process.pid}] `);
 log.setLevel(0);
 
 if(!process.env.LOG_TO_STDOUT) {
-  log.setWriter(log.writeToPath(settings.cliLogPath()));
+  //log.setWriter(log.writeToPath(settings.cliLogPath()));
 }
 
 const yargs = require("yargs");
-const tracking = require("../../common/tracking");
+const tracking = require("@sidekick/common/tracking");
 
-const userSettings = require("../../core/userSettings");
-userSettings.load();
-
-var Promise = require("bluebird");
-
-const VERSION = settings.version();
 
 exports.run = run;
 

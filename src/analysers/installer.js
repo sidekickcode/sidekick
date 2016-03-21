@@ -1,6 +1,8 @@
 "use strict";
 
 const SAM = require('@sidekick/analyser-manager');
+const repoConfig = require('@sidekick/common/repoConfig');
+
 const _ = require('lodash');
 const Promise = require('bluebird');
 
@@ -8,25 +10,28 @@ const EventEmitter = require('events');
 const inherits = require('util').inherits;
 const path = require('path');
 
-const repoConfig = require("../../../core/config/repoConfig");
-
 module.exports = exports = Installer;
 
-function Installer(isCI) {
+function Installer(analyserInstallLocation) {
   var self = this;
-  var analyserInstallDir = isCI ? path.join(__dirname, '/installed') : undefined; //don't override for non CI
 
-  //on CI, install analysers to a subdir of our current location, otherwise the AM knows where to put things
-  const AnalyserManager = new SAM(analyserInstallDir);
+  const AnalyserManager = new SAM(analyserInstallLocation);
+  //ensure install location exists
+  AnalyserManager.init()
+    .catch(function(err){
+      throw Error('Unable to initialise AnalyserManager', err);
+    });
 
   EventEmitter.call(self);
 
   self.installAnalysers = function(repoPath) {
-    return getConfig(repoPath)
+    return repoConfig.load(repoPath)
       .then(function(config) {
-        var allAnalysers = AnalyserManager.getAllAnalysersForConfig(config);
+        var allAnalysers = repoConfig.getAllAnalysers(config);
 
-        AnalyserManager.on('downloading', function (data) {self.emit('downloading', data);});
+        AnalyserManager.on('downloading', function (data) {
+          self.emit('downloading', data);}
+        );
         AnalyserManager.on('downloaded', function (data) {self.emit('downloaded', data);});
         AnalyserManager.on('installing', function (data) {self.emit('installing', data);});
         AnalyserManager.on('installed', function (data) {self.emit('installed', data);});
@@ -36,25 +41,11 @@ function Installer(isCI) {
             .then(function (config) {
               //config contains {path, config} add to analyser to be {path, config, name, failCiOnError, version}
               return _.defaults(config, analyser);
-            }, function (err) {
-              //install failed
-            });
+            })
         });
 
         return Promise.all(installPromises);
       });
-
-    function getConfig(repoPath) {
-      return new Promise(function(resolve, reject){
-        var config = repoConfig.load(repoPath);
-        resolve(config);
-      });
-/*      return RepoConfig.load(repoPath)
-        .catch(function (e) {
-          self.emit("error", e);
-          return Promise.reject(e);
-        });*/
-    }
   }
 }
 

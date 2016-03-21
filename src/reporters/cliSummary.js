@@ -6,6 +6,11 @@
 const chalk = require('chalk');
 const _ = require('lodash');
 const Spinner = require('cli-spinner').Spinner;
+//var ttys = require("ttys");
+
+const readline = require("readline");
+
+const SUCCESS_TICK = chalk.green("✔");
 
 module.exports = exports = reporter;
 
@@ -21,6 +26,12 @@ const MESSAGE_TYPE = {
 
 function reporter(emitter, outputter) {
   const output = outputter || defaultOutput;
+
+  var cursor = readline.createInterface({ input: process.stdin, output: process.stdout });
+  //var cursor = readline.createInterface({ input: ttys.stdin, output: ttys.stdout });
+
+  var installLines = {};
+  var curInstallerLine = 0;
 
   emitter.on("start", function(err, data){
     var fileStr = pluralise('file', data.paths.length);
@@ -66,6 +77,25 @@ function reporter(emitter, outputter) {
     outputSummary();
   });
 
+  //todo needs green ticks and reset to be 1 line per analyser
+  emitter.on('downloading', function(data){
+    outputString(`Downloading analyser: ${data.analyser}`);
+    installLines[data.analyser] = curInstallerLine;
+    curInstallerLine ++;
+  });
+  emitter.on('downloaded', function(data){
+    outputString(`Downloaded analyser: ${data.analyser}`);
+    //outputLine(`Downloaded analyser: ${data.analyser}`, installLines[data.analyser]);
+  });
+  emitter.on('installing', function(data){
+    outputString(`Installing analyser: ${data.analyser}`);
+    //outputLine(`Installing analyser: ${data.analyser}`, installLines[data.analyser]);
+  });
+  emitter.on('installed', function(data){
+    outputString(SUCCESS_TICK + ` Installed analyser: ${data.analyser}`);
+    //outputLine(SUCCESS_TICK + ` Installed analyser: ${data.analyser}`, installLines[data.analyser]);
+  });
+
   function outputString(x, colour) {
     if(colour){
       try{
@@ -79,6 +109,13 @@ function reporter(emitter, outputter) {
   }
   function outputJson(x) {
     output(JSON.stringify(x));
+  }
+
+  function outputLine(str, line){
+    const TO_THE_RIGHT_OF_CURSOR = 1;
+    readline.moveCursor(process.stdout, 0, 3 - line);
+    readline.clearLine(process.stdout, TO_THE_RIGHT_OF_CURSOR);
+    cursor.write(str);
   }
 
   function getSummariesForLang(){

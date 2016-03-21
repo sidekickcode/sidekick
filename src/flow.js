@@ -4,7 +4,7 @@
 "use strict";
 
 const Promise = require("bluebird");
-const RepoConfig = require("../../common/repo-config");
+const RepoConfig = require("@sidekick/common/repoConfig");
 
 exports.Exit = Exit;
 

@@ -3,21 +3,20 @@
  */
 "use strict";
 
-const git = require("../git");
-const EventEmitter = require("events").EventEmitter;
+const git = require("@sidekick/git-helpers");
+const log = require("@sidekick/common/log").derive({ tags: ["run"] });
 
 const _ = require("lodash");
-
 const Promise = require('bluebird');
+
+const EventEmitter = require("events").EventEmitter;
+const path = require('path');
 
 const flow = require("./flow");
 const runValidations = flow.runValidations;
 const Exit = flow.Exit;
 
-const log = require("../../common/log").derive({ tags: ["run"] });
-const analysisSession = require("../../daemon/analysis-session");
-
-const parseCommitish = require("../../daemon/git").parseCommitish;
+//const analysisSession = require("../../daemon/analysis-session");
 
 const reporters = Object.create(null);
 reporters["cli-summary"]  = require("./reporters/cliSummary");
@@ -33,6 +32,8 @@ module.exports = exports = function(yargs) {
   const repoPath = command.repoPath;
 
   const reporter = getReporter();
+
+  reporter(events);
 
   return git.findRootGitRepo(repoPath)
     .error(git.NotAGitRepo, function() {
@@ -51,12 +52,10 @@ module.exports = exports = function(yargs) {
       } else {
         if(command.ci){
           return runOnCi(repoPath)
-              .then(function() {
-                return analyse(exitOrResult)
-              }, function(err){
-                //ci install failed
-                return exitOrResult
-              });
+            .then(function(analysers) {
+              command.analysers = analysers;  //add all the required analysers to the command
+              return analyse(exitOrResult)
+            })
         } else {
           return analyse(exitOrResult);
         }
@@ -109,18 +108,25 @@ module.exports = exports = function(yargs) {
    */
   function runOnCi(repoPath){
     var Installer = require('./analysers/installer');
-    var installer = new Installer(true);  //install in CI mode
-    installer.on('downloading', function(){});
-    installer.on('downloaded', function(){});
-    installer.on('installing', function(){});
-    installer.on('installed', function(){});
+
+    try {
+      var installer = new Installer(path.join(__dirname, '/analysers/installed'));  //install into a subdir of this module's location
+      installer.on('downloading', function (data) {
+        events.emit('downloading', data);
+      });
+      installer.on('downloaded', function (data) {events.emit('downloaded', data);});
+      installer.on('installing', function (data) {events.emit('installing', data);});
+      installer.on('installed', function (data) {events.emit('installed', data);});
+    } catch(err){
+      doExit(1, "Unable to acquire AnalyserManager.", err);
+    }
+    
     return installer.installAnalysers(repoPath)
-        .then(function(results){
-          //all analysers installed fine
-          //return list of analysers with their path, config..
-        }, function(err){
-          //problem installing at least 1 analyser
-        })
+      .then(function(results){
+        return results; //all analysers installed fine
+      }, function(err){
+        doExit(1, "Unable to install all required analysers.", err);
+      })
   }
 
   function analyse() {
@@ -146,6 +152,12 @@ module.exports = exports = function(yargs) {
           } else {
             if(issues.length > 0) {
               heardIssues = true;
+
+              //if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
+              if(command.ci && command.analysers[analyser].failCiOnError){
+                doExit(1, `Sidekick found issues. Analyser '${analyser.displayName}' reported and issue in ${file.path}`);
+              }
+
               events.emit("result", {
                 path: file.path,
                 analyser: analyser.analyser,
@@ -173,8 +185,6 @@ module.exports = exports = function(yargs) {
           log('heard analysisEnd');
           events.emit("end");
         });
-
-        reporter(events);
 
         session.start();
       });
