@@ -1,0 +1,15 @@
+#!/bin/bash
+
+
+printf "\n%s\n\n" 'Demoing on test/fixtures/ok.coffee'
+
+node index.js < test/fixtures/ok.coffee
+
+printf "\n%s\n\n" 'Demo on test/fixtures/cyclo_fail.coffee'
+
+node index.js < test/fixtures/cyclo_fail.coffee
+
+printf "\n%s\n\n" 'Demoing on test/cyclo_fail_header.coffee with header'
+
+export HAS_HEADER=1
+node index.js < test/fixtures/cyclo_fail_header.coffee

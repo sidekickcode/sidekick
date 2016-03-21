@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export HAS_HEADER=1
+bin/blob < test/fixture.js

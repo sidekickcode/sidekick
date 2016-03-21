@@ -1,0 +1,29 @@
+{
+  "name": "sidekick-coffeelint",
+  "version": "1.0.1",
+  "description": "Sidekick analyser that wraps 'coffeelint'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "code",
+    "quality",
+    "dependencies"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sidekickcode/sidekick-david.git"
+  },
+  "author": "We Are Sidekick Ltd.",
+  "license": "MIT",
+  "homepage": "https://sidekickcode.com",
+  "bugs": {
+    "url": "https://github.com/sidekickcode/sidekick-david/issues"
+  },
+  "dependencies": {
+    "coffeelint": "^1.13.1",
+    "sidekick-analyser": "^1.1.0"
+  }
+}

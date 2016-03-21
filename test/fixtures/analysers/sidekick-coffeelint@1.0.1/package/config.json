@@ -1,0 +1,20 @@
+{
+  "analyser": "coffeelint",
+  "version": "0.0.1",
+  "interpreter": "node",
+  "script": "index.js",
+  "scope": "blob",
+  "category": "object",
+  "tagger": false,
+  "configurable": true,
+  "language": "cs",
+  "shortName": "coffeelint",
+  "displayName": "Code issues (coffeelint)",
+  "displayColor": "brown",
+  "displayCategory": "quality",
+  "shortDescription": "Checks your code for quality issues.",
+  "underlyingAnalyser": {
+    "name": "coffeelint",
+    "url": "https://github.com/clutchski/coffeelint"
+  }
+}

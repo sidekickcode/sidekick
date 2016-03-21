@@ -1,0 +1,18 @@
+{
+  "analyser": "sidekick-js-todos",
+  "version": "0.1.0",
+  "interpreter": "node",
+  "script": "index.js",
+  "scope": "blob",
+  "tagger": false,
+  "language": "js",
+  "category": "object",
+  "shortName": "todo/fixme",
+  "displayCategory": "style",
+  "displayName": "TODOs and FIXMEs",
+  "shortDescription": "Finds TODO and FIXME comments in your code.",
+  "underlyingAnalyser": {
+    "name": "js-todos",
+    "url": "https://github.com/sidekickcode/sidekick-js-todos"
+  }
+}

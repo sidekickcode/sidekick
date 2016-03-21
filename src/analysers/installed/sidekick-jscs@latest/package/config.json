@@ -1,0 +1,23 @@
+{
+    "analyser": "jscs",
+    "version": "0.0.1",
+    "interpreter": "node",
+    "script": "jscs.js",
+    "scope": "blob",
+    "category": "object",
+    "configurable": true,
+    "configFiles": [
+        ".jscsrc"
+    ],
+    "language": "js",
+    "displayName": "Code style (jscs)",
+    "shortName": "jscs",
+    "displayColor": "yellow",
+    "itemType": "style violation",
+    "displayCategory": "style",
+    "shortDescription": "Checks that your code conforms to your code style guidelines.",
+    "underlyingAnalyser": {
+      "name": "jscs",
+      "url": "https://github.com/jscs-dev/node-jscs"
+    }
+}
