@@ -16,6 +16,7 @@ const flow = require("./flow");
 const runValidations = flow.runValidations;
 const Exit = flow.Exit;
 const Installer = require('./analysers/installer');
+const yargs = require("yargs");
 
 //const analysisSession = require("../../daemon/analysis-session");
 
@@ -24,10 +25,10 @@ reporters["cli-summary"]  = require("./reporters/cliSummary");
 reporters["json-stream"]  = require("./reporters/jsonStream");
 reporters["junit"]        = require("./reporters/junit");
 
-module.exports = exports = function(yargs) {
+module.exports = exports = function(argv) {
 
-  log("run command");
-  const command = parseInput(yargs);
+  const command = parseInput();
+  log("command: " + JSON.stringify(command));
 
   const events = new EventEmitter;
   const repoPath = command.repoPath;
@@ -212,8 +213,11 @@ function fail(err) {
   doExit(1, "sidekick suffered an unexpected failure", err);
 }
 
-function parseInput(yargs) {
-  const argv = yargs.argv;
+function parseInput() {
+  const argv = yargs
+    .boolean("ci")
+    .argv;
+
   const repoPath = argv._[1] || process.cwd();
   const cmd = {
     repoPath: repoPath,
