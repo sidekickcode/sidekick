@@ -3,15 +3,9 @@
 // NOTE - do not require anything else before logs, to ensure all
 // logs go to correct place
 //const settings = require("../../common/settings");
-const VERSION = '1,10'; //  settings.version();
+const VERSION = require("../package.json").version;
 
-const log = require("@sidekick/common/log");
-log.setPrefix(`[cli ${process.pid}] `);
-log.setLevel(0);
-
-if(!process.env.LOG_TO_STDOUT) {
-  //log.setWriter(log.writeToPath(settings.cliLogPath()));
-}
+const log = require("debug")("cli");
 
 const yargs = require("yargs");
 const tracking = require("@sidekick/common/tracking");
@@ -56,7 +50,7 @@ function run() {
   const cmd = yargs.argv._[0];
   const fn = commands[cmd];
 
-  log.debug('\n**********************************************************************\n');
+  log('\n**********************************************************************\n');
 
   process.on("exit", function(code) {
     log("exit " + code);
@@ -65,7 +59,7 @@ function run() {
   process.on("uncaughtException", handleUnexpectedException);
 
   process.on("unhandledRejection", function(err) {
-    log.error("unhandled promise rejection! " + err.stack || err);
+    log("unhandled promise rejection! " + err.stack || err);
     tracking.error(err);
   });
 
@@ -92,7 +86,7 @@ function run() {
 }
 
 function handleUnexpectedException(err) {
-  log.error("uncaughtException! " + err.stack || err);
+  log("uncaughtException! " + err.stack || err);
   tracking.error(err);
 }
 

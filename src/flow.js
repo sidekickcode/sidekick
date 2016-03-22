@@ -6,6 +6,8 @@
 const Promise = require("bluebird");
 const RepoConfig = require("@sidekick/common/repoConfig");
 
+const debug = require("debug")("cli:flow");
+
 exports.Exit = Exit;
 
 // runs a sequence of functions that will return a Exit instance
@@ -20,7 +22,7 @@ exports.runValidations = function runValidations(vals, log) {
         return Promise.resolve(true);
       } else {
         var validation = vals.shift();
-        log("running " + validation.name);
+        debug("validation: " + validation.name);
 
         return validation()
         .then(function(exit) {
@@ -38,16 +40,16 @@ exports.hasConfigValidation = function hasConfig(path) {
   })
   .catch(function(err) {
     const msg = missingConfigErrorMessages(err);
-    return new Exit(1, `sidekick hook present, ${msg}.`);
+    return new Exit(1, msg);
   });
 
   function missingConfigErrorMessages(err) {
     switch(err.code) {
     case "ENOENT":
-      return `but there is no ".sidekickrc" file in the root of this repo. run "sk init" to create one, or "sk remove" to remove the hook`;
+      return `there is no ".sidekickrc" file in the root of this repo. run "sk init" to create one, or "sk remove" to remove the hook`;
     case "EACCES":
     case "EPERM":
-      return `but had issues opening ".sidekickrc" (file permissions?)`;
+      return `had issues opening ".sidekickrc" (file permissions?)`;
     default:
       return `had an unexpected issue when opening ".sidekickrc" (${err.code || err.message}). run "sk init" to create a ".sidekickrc" file`;
     }

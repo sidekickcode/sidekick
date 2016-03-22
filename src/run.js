@@ -4,7 +4,7 @@
 "use strict";
 
 const git = require("@sidekick/git-helpers");
-const log = require("@sidekick/common/log").derive({ tags: ["run"] });
+const log = require("debug")("cli:run");
 
 const _ = require("lodash");
 const Promise = require('bluebird');
@@ -15,6 +15,7 @@ const path = require('path');
 const flow = require("./flow");
 const runValidations = flow.runValidations;
 const Exit = flow.Exit;
+const Installer = require('./analysers/installer');
 
 //const analysisSession = require("../../daemon/analysis-session");
 
@@ -36,19 +37,15 @@ module.exports = exports = function(yargs) {
   reporter(events);
 
   return git.findRootGitRepo(repoPath)
-    .error(git.NotAGitRepo, function() {
+    .catch(git.NotAGitRepo, function() {
       doExit(1, "sk run must be run on a git repo");
     })
     .then(validateAndPrepare)
     .then(function(exitOrResult) {
       if(exitOrResult instanceof Exit) {
         const exit = exitOrResult;
+        return doExit(exit.code, exit.message);
 
-        if(exit.code === 0) {
-          return doExit(0, exit.message);
-        }
-
-        exitOptionallySkipping(exit);
       } else {
         if(command.ci){
           return runOnCi(repoPath)
@@ -107,7 +104,6 @@ module.exports = exports = function(yargs) {
    * @returns {*}
    */
   function runOnCi(repoPath){
-    var Installer = require('./analysers/installer');
 
     try {
       var installer = new Installer(path.join(__dirname, '/analysers/installed'));  //install into a subdir of this module's location
@@ -117,7 +113,7 @@ module.exports = exports = function(yargs) {
       installer.on('downloaded', function (data) {events.emit('downloaded', data);});
       installer.on('installing', function (data) {events.emit('installing', data);});
       installer.on('installed', function (data) {events.emit('installed', data);});
-    } catch(err){
+    } catch(err) {
       doExit(1, "Unable to acquire AnalyserManager.", err);
     }
     
@@ -190,11 +186,6 @@ module.exports = exports = function(yargs) {
       });
   }
 
-
-  function exitOptionallySkipping(exit) {
-    events.emit("exitOptionalSkipping", exit);
-  }
-
   function getReporter() {
     if(!command.reporter) {
       return reporters["cli-summary"];  //default to summary report
@@ -217,7 +208,7 @@ module.exports = exports = function(yargs) {
 };
 
 function fail(err) {
-  log.error("UNEXPECTED FAILURE " + (err ? (err.stack || err) : " without error passed"));
+  log("UNEXPECTED FAILURE " + (err ? (err.stack || err) : " without error passed"));
   doExit(1, "sidekick suffered an unexpected failure", err);
 }
 
