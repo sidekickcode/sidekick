@@ -2,5 +2,10 @@ language: node_js
 node_js:
   - "5.1"
 
+
 notifications:
   slack: we-are-sidekick:GeIT5wtuKMLImpFXYHWzIGzI
+
+script:
+  - npm test 
+  - npm run quality

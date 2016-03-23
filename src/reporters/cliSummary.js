@@ -6,7 +6,6 @@
 const chalk = require('chalk');
 const _ = require('lodash');
 const Spinner = require('cli-spinner').Spinner;
-//var ttys = require("ttys");
 
 const readline = require("readline");
 
@@ -14,6 +13,7 @@ const SUCCESS_TICK = chalk.green("✔");
 
 module.exports = exports = reporter;
 
+const Readable = require("stream").Readable;
 const defaultOutput = (x) => console.log(x);
 
 
@@ -31,8 +31,9 @@ function reporter(emitter, outputter) {
   const errors = [];
   const output = outputter || defaultOutput;
 
-  var cursor = readline.createInterface({ input: process.stdin, output: process.stdout });
-  //var cursor = readline.createInterface({ input: ttys.stdin, output: ttys.stdout });
+  const ignoreInput = new Readable;
+
+  var cursor = readline.createInterface({ input: ignoreInput, output: process.stdout });
 
   var installLines = {};
   var curInstallerLine = 0;
