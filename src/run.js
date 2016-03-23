@@ -11,7 +11,6 @@ const Promise = require('bluebird');
 
 const EventEmitter = require("events").EventEmitter;
 
-const Installer = require('./analysers/installer');
 const yargs = require("yargs");
 
 const proxy = require("@sidekick/common/eventHelpers").proxy;

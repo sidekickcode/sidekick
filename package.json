@@ -4,8 +4,9 @@
   "description": "Your code, made perfect.",
   "main": "index.js",
   "scripts": {
-    "test": "exec mocha"
+    "test": "mocha src/*.test.js src/*/*.test.js"
   },
+  "bin": "sidekick-cli.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sidekickcode/sidekick.git"
