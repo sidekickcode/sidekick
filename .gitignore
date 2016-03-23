@@ -1,4 +1,3 @@
-/test/fixtures/analysers
 # Logs
 logs
 *.log
@@ -35,3 +34,4 @@ node_modules
 
 
 src/analysers/installed
+test/fixtures/analysers

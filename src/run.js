@@ -29,7 +29,7 @@ module.exports = exports = function(argv) {
   const events = new EventEmitter;
   const reporter = getReporter(command.reporter);
 
-  //reporter(events);
+  reporter(events);
 
   return git.findRootGitRepo(command.path)
     .catch(git.NotAGitRepo, function() {
