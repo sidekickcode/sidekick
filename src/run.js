@@ -10,15 +10,12 @@ const _ = require("lodash");
 const Promise = require('bluebird');
 
 const EventEmitter = require("events").EventEmitter;
-const path = require('path');
 
-const flow = require("./flow");
-const runValidations = flow.runValidations;
-const Exit = flow.Exit;
 const Installer = require('./analysers/installer');
 const yargs = require("yargs");
 
-//const analysisSession = require("../../daemon/analysis-session");
+const proxy = require("@sidekick/common/eventHelpers").proxy;
+const runner = require("@sidekick/runner");
 
 const reporters = Object.create(null);
 reporters["cli-summary"]  = require("./reporters/cliSummary");
@@ -26,201 +23,43 @@ reporters["json-stream"]  = require("./reporters/jsonStream");
 reporters["junit"]        = require("./reporters/junit");
 
 module.exports = exports = function(argv) {
-
   const command = parseInput();
-  log("command: " + JSON.stringify(command));
+  log("command: %j", command);
 
   const events = new EventEmitter;
-  const repoPath = command.repoPath;
+  const reporter = getReporter(command.reporter);
 
-  const reporter = getReporter();
+  //reporter(events);
 
-  reporter(events);
-
-  return git.findRootGitRepo(repoPath)
+  return git.findRootGitRepo(command.path)
     .catch(git.NotAGitRepo, function() {
-      doExit(1, "sk run must be run on a git repo");
+      return doExit(1, "sk run must be run on a git repo");
     })
-    .then(validateAndPrepare)
-    .then(function(exitOrResult) {
-      if(exitOrResult instanceof Exit) {
-        const exit = exitOrResult;
-        return doExit(exit.code, exit.message);
-
-      } else {
-        if(command.ci){
-          return runOnCi(repoPath)
-            .then(function(analysers) {
-              command.analysers = analysers;  //add all the required analysers to the command
-              return analyse(exitOrResult)
-            })
-        } else {
-          return analyse(exitOrResult);
-        }
-      }
+    .then(function createTarget(repoPath) {
+      return createGitTarget(command, repoPath)
     })
-    .catch(fail);
+    .catch(fail)
+    .then(function(target) {
 
-  function validateAndPrepare() {
-    return runValidations([_.partial(flow.hasConfigValidation, repoPath), commitsDefined], log)
-      .then(function(exit) {
-        return exit instanceof Exit ? exit : null;
-      });
-  }
+      log("starting analysis with %j", target);
 
-  function commitsDefined() {
-    const validated = _.mapValues(_.pick(command, "versus", "compare"), validate);
-    return Promise.props(validated)
-    .then(function(all) {
-      const invalid = _.transform(all, function(invalid, error, name) {
-        if(error instanceof Error) {
-          invalid[name] = error;
-        }
-      });
-
-      if(_.isEmpty(invalid)) {
-        // extend command with head/base. not ideal to mutate, will do for now
-        _.extend(command, all);
-      } else {
-        return Promise.reject(Error(_.values(invalid).join(", and ")));
-      }
-    });
-
-    function validate(commitish, name) {
-      if(commitish) {
-        return parseCommitish(command.repoPath, commitish)
-          .catch(function(e) {
-            return Error(`cannot parse '${commitish}' as commitsh value for '--${name}'`);
-          });
-      } else {
-        return `missing value for '--${name}'`;
-      }
-    }
-  }
-
-  /**
-   * Run on a CI server.
-   * Download and install all required analysers
-   * @param repoPath abs path to the repo
-   * @returns {*}
-   */
-  function runOnCi(repoPath){
-
-    try {
-      var installer = new Installer(path.join(__dirname, '/analysers/installed'));  //install into a subdir of this module's location
-      installer.on('downloading', function (data) {
-        events.emit('downloading', data);
-      });
-      installer.on('downloaded', function (data) {events.emit('downloaded', data);});
-      installer.on('installing', function (data) {events.emit('installing', data);});
-      installer.on('installed', function (data) {events.emit('installed', data);});
-    } catch(err) {
-      doExit(1, "Unable to acquire AnalyserManager.", err);
-    }
-    
-    return installer.installAnalysers(repoPath)
-      .then(function(results){
-        return results; //all analysers installed fine
-      }, function(err){
-        doExit(1, "Unable to install all required analysers.", err);
+      return runner.session({
+        target: target,
+        shouldInstall: command.ci,
       })
-  }
 
-  function analyse() {
-    log("about to analyse", JSON.stringify(command));
-    analysisSession.build(repoPath, command.compare, command.versus)
-      .then(function(session) {
-
-        const events = new EventEmitter;
-        let heardIssues = false;
-
-        session.on("analysisStart", function(err, data) {
-          log('heard analysisStart');
-          events.emit("start", err, data);
-        });
-
-        session.on("fileAnalyserEnd", function(err, file, analyser, issues) {
-          if(err) {
-            events.emit("error", {
-              path: file.path,
-              analyser: analyser.analyser,
-              error: err,
-            });
-          } else {
-            if(issues.length > 0) {
-              heardIssues = true;
-
-              //if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
-              if(command.ci && command.analysers[analyser].failCiOnError){
-                doExit(1, `Sidekick found issues. Analyser '${analyser.displayName}' reported and issue in ${file.path}`);
-              }
-
-              events.emit("result", {
-                path: file.path,
-                analyser: analyser.analyser,
-                analyserVersion: analyser.version,
-                analyserDisplayName: analyser.displayName,
-                analyserItemType: analyser.itemType,
-                issues: issues.map((i) => {
-                  return _.defaults(_.omit(i, "analyser", "version", "location"), i.location)
-                }),
-              });
-            } else {
-              events.emit("fileProcessed", {});
-            }
-          }
-        });
-
-        // when process is all done, we exit
-        process.on('exit', function() {
-          const code = yargs.noCiExitCode ? 0
-                                          : (heardIssues ? 1 : 0);
-          process.exit(code);
-        });
-
-        session.on("analysisEnd", function() {
-          log('heard analysisEnd');
-          events.emit("end");
-        });
-
-        session.start();
-      });
-  }
-
-  function getReporter() {
-    if(!command.reporter) {
-      return reporters["cli-summary"];  //default to summary report
-    }
-
-    const reporter = reporters[command.reporter];
-    if(reporter) {
-      return reporter;
-    }
-
-    try {
-      return require(command.reporter);
-    } catch(e) {
-      console.error(`couldn't load reporter '${command.reporter}': ${e.stack}`);
-      doExit(1);
-    }
-  }
-
-
-};
-
-function fail(err) {
-  log("UNEXPECTED FAILURE " + (err ? (err.stack || err) : " without error passed"));
-  doExit(1, "sidekick suffered an unexpected failure", err);
+    })
+    .then((session) => runSession(session, command, events))
 }
 
-function parseInput() {
+function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, reporter?: string } */ {
   const argv = yargs
     .boolean("ci")
     .argv;
 
-  const repoPath = argv._[1] || process.cwd();
+  const path = argv._[1] || process.cwd();
   const cmd = {
-    repoPath: repoPath,
+    path: path,
     reporter: argv.reporter,
   };
 
@@ -233,11 +72,128 @@ function parseInput() {
     cmd.compare = argv.compare;
   }
 
-  if(argv.ci) {
-    cmd.ci = argv.ci;
-  }
+  cmd.ci = argv.ci;
 
   return cmd;
+}
+
+
+function getReporter(name) {
+  // default to summary report
+  if(!name) {
+    return reporters["cli-summary"];
+  }
+
+  const reporter = reporters[name];
+  if(reporter) {
+    return reporter;
+  }
+
+  try {
+    return require(name);
+  } catch(e) {
+    console.error(`couldn't load reporter '${name}': ${e.stack}`);
+    doExit(1);
+  }
+}
+
+function runSession(session, command, events) {
+  let heardIssues = false;
+
+  const analysis = session.start();
+
+  analysis.on("start", function(err, data) {
+    log('heard analysisStart');
+    events.emit("start", err, data);
+  });
+
+  analysis.on("fileAnalyserEnd", emitResultForReporter);
+
+  // when the session is finished, we have no more tasks schedules
+  // and node should exit
+  process.on('exit', function() {
+    const code = yargs.noCiExitCode ? 0
+                                    : (heardIssues ? 1 : 0);
+    process.exit(code);
+  });
+
+  analysis.on("end", function() {
+    log('heard analysisEnd');
+    events.emit("end");
+  });
+
+  function emitResultForReporter(err, file, analyser, issues) {
+    if(err) {
+      events.emit("error", {
+        path: file.path,
+        analyser: analyser.analyser,
+        error: err,
+      });
+
+    } else {
+      if(issues.length > 0) {
+
+        //if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
+        if(!command.ci || command.analysers[analyser].failCiOnError) {
+          heardIssues = true;
+        }
+
+        events.emit("result", {
+          path: file.path,
+          analyser: analyser.analyser,
+          analyserVersion: analyser.version,
+          analyserDisplayName: analyser.displayName,
+          analyserItemType: analyser.itemType,
+          issues: issues.map((i) => {
+            return _.defaults(_.omit(i, "analyser", "version", "location"), i.location)
+          }),
+        });
+      } else {
+        events.emit("fileProcessed", {});
+      }
+    }
+  }
+}
+
+function createGitTarget(command, repoPath) {
+  const validated = _.mapValues(_.pick(command, "versus", "compare"), validate);
+
+  return Promise.props(validated)
+  .then(function(all) {
+    const invalid = _.transform(all, function(invalid, error, name) {
+      if(error instanceof Error) {
+        invalid[name] = error;
+      }
+    });
+
+    if(_.isEmpty(invalid)) {
+      // extend command with head/base.
+      return {
+        type: "git",
+        path: repoPath,
+        compare: all.compare,
+        versus: all.versus,
+      };
+
+    } else {
+      return Promise.reject(Error(_.values(invalid).join(", and ")));
+    }
+  });
+
+  function validate(commitish, name) {
+    if(commitish) {
+      return parseCommitish(command.repoPath, commitish)
+        .catch(function(e) {
+          return Error(`cannot parse '${commitish}' as commitsh value for '--${name}'`);
+        });
+    } else {
+      return `missing value for '--${name}'`;
+    }
+  }
+}
+
+function outputError(e) {
+  console.error(e);
 }
 
 function errorWithCode(code) {
@@ -255,10 +211,10 @@ function doExit(code, message, error) {
   process.exit(code);
 }
 
-function outputError(e) {
-  console.error(e);
+function fail(err) {
+  log("UNEXPECTED FAILURE " + (err ? (err.stack || err) : " without error passed"));
+  doExit(1, "sidekick suffered an unexpected failure", err);
 }
-
 
 exports.help = `
 usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --no-ci-exit-code ]
@@ -298,3 +254,4 @@ Exit code
     Will exit with status code 1 if any issues are detected - disable this with --no-ci-exit-code
 
 `;
+

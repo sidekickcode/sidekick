@@ -1,0 +1,37 @@
+{
+    "exclude": [
+        "test",
+        "app/build",
+        "app/dist",
+        "build",
+        "app/demoRepo",
+        "app/node_modules",
+        "dist",
+        "tmp",
+        "app/browser/vendor"
+    ],
+    "languages": {
+      "js": {
+        "sidekick-js-todos": {
+          "failCiOnError": false,
+          "version": "1.0.1"
+        },
+        "sidekick-jscs": {
+            "failCiOnError": false
+        },
+        "sidekick-eslint": {
+            "failCiOnError": true
+        }
+      },
+      "cs": {
+        "sidekick-coffeelint": {
+            "failCiOnError": false
+        }
+      },
+      "json": {
+          "sidekick-david": {
+              "failCiOnError": false
+          }
+      }
+    }
+}

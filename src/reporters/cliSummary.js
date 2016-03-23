@@ -33,7 +33,7 @@ function reporter(emitter, outputter) {
   var installLines = {};
   var curInstallerLine = 0;
 
-  emitter.on("start", function(err, data){
+  emitter.on("start", function(err, analysis /*: Analysis */){
     var fileStr = pluralise('file', data.paths.length);
     var analyserCount = data.analysers.length;
     var analyserStr = pluralise('analyser', analyserCount);

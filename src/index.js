@@ -10,7 +10,6 @@ const log = require("debug")("cli");
 const yargs = require("yargs");
 const tracking = require("@sidekick/common/tracking");
 
-
 exports.run = run;
 
 // safe lookup w/o proto
@@ -50,7 +49,11 @@ function run() {
   const cmd = yargs.argv._[0];
   const fn = commands[cmd];
 
-  log('\n**********************************************************************\n');
+  log('  ***  CLI STARTUP ***  ');
+
+  tracking.start({
+    version: VERSION,
+  });
 
   process.on("exit", function(code) {
     log("exit " + code);
