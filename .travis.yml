@@ -8,4 +8,4 @@ notifications:
 
 script:
   - npm test 
-  - npm run quality
+  - node sidekick-cli.js run --ci
