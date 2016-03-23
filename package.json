@@ -4,7 +4,8 @@
   "description": "Your code, made perfect.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha src/*/*.test.js"
+    "test": "mocha src/*/*.test.js",
+    "coverage": "istanbul cover _mocha src/*/*.test.js"
   },
   "bin": "sidekick-cli.js",
   "repository": {
@@ -40,6 +41,7 @@
     "elementtree": "^0.1.6",
     "flow-bin": "^0.22.1",
     "fs-extra": "^0.26.7",
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3"
   }
