@@ -122,6 +122,7 @@ function runSession(session, command, events) {
   });
 
   function emitResultForReporter(err, file, analyser, issues) {
+    
     if(err) {
       events.emit("error", {
         path: file.path,
@@ -130,26 +131,21 @@ function runSession(session, command, events) {
       });
 
     } else {
-      if(issues.length > 0) {
-
-        //if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
-        if(!command.ci || command.analysers[analyser].failCiOnError) {
-          heardIssues = true;
-        }
-
-        events.emit("result", {
-          path: file.path,
-          analyser: analyser.analyser,
-          analyserVersion: analyser.version,
-          analyserDisplayName: analyser.displayName,
-          analyserItemType: analyser.itemType,
-          issues: issues.map((i) => {
-            return _.defaults(_.omit(i, "analyser", "version", "location"), i.location)
-          }),
-        });
-      } else {
-        events.emit("fileProcessed", {});
+      // if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
+      if(!command.ci || analyser.failsCiOnError !== false) {
+        heardIssues = heardIssues || issues.meta.length > 0;
       }
+
+      events.emit("result", {
+        path: file.path,
+        analyser: analyser.analyser,
+        analyserVersion: analyser.version,
+        analyserDisplayName: analyser.displayName,
+        analyserItemType: analyser.itemType,
+        issues: issues.meta.map((i) => {
+          return _.defaults(_.omit(i, "analyser", "version", "location"), i.location)
+        }),
+      });
     }
   }
 }

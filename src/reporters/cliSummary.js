@@ -16,7 +16,6 @@ module.exports = exports = reporter;
 
 const defaultOutput = (x) => console.log(x);
 
-var metas, errors, spinner, processed, analyserSummaries = [], langCount;
 
 const MESSAGE_TYPE = {
   INFO : 'cyan',
@@ -25,6 +24,11 @@ const MESSAGE_TYPE = {
 };
 
 function reporter(emitter, outputter) {
+  var spinner; 
+  var processed = 0;
+
+  const metas = [];
+  const errors = [];
   const output = outputter || defaultOutput;
 
   var cursor = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -34,6 +38,12 @@ function reporter(emitter, outputter) {
   var curInstallerLine = 0;
 
   emitter.on("start", function(err, analysis /*: Analysis */){
+    spinner = new Spinner('Analysing..');
+    spinner.start();
+
+    // broken
+    return;
+
     var fileStr = pluralise('file', data.paths.length);
     var analyserCount = data.analysers.length;
     var analyserStr = pluralise('analyser', analyserCount);
@@ -43,11 +53,6 @@ function reporter(emitter, outputter) {
     var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${data.paths.length} ${fileStr}${timeStr}.`;
     outputString(title);
 
-    spinner = new Spinner('Analysing..');
-    spinner.start();
-    processed = 0;
-    metas = [];
-    errors = [];
 
     function timeToRun(fileCount){
       if(fileCount < 60){
@@ -58,10 +63,6 @@ function reporter(emitter, outputter) {
         return `${parseInt( Math.floor(fileCount / 60))} minutes`;
       }
     }
-  });
-
-  emitter.on("fileProcessed", function(){
-    processed ++;
   });
 
   emitter.on("result", function(meta){
@@ -85,15 +86,12 @@ function reporter(emitter, outputter) {
   });
   emitter.on('downloaded', function(data){
     outputString(`Downloaded analyser: ${data.analyser}`);
-    //outputLine(`Downloaded analyser: ${data.analyser}`, installLines[data.analyser]);
   });
   emitter.on('installing', function(data){
     outputString(`Installing analyser: ${data.analyser}`);
-    //outputLine(`Installing analyser: ${data.analyser}`, installLines[data.analyser]);
   });
   emitter.on('installed', function(data){
     outputString(SUCCESS_TICK + ` Installed analyser: ${data.analyser}`);
-    //outputLine(SUCCESS_TICK + ` Installed analyser: ${data.analyser}`, installLines[data.analyser]);
   });
 
   function outputString(x, colour) {
@@ -118,12 +116,11 @@ function reporter(emitter, outputter) {
     cursor.write(str);
   }
 
-  function getSummariesForLang(){
+  function getSummariesByAnalyser(){
     var issuesByAnalyser = _.groupBy(metas, 'analyser');
     var errByAnalyser = _.groupBy(errors, 'analyser');
-    var summariesForLang = [];
 
-    _.forEach(issuesByAnalyser, function(value, key){
+    return _.map(issuesByAnalyser, function(value, key){
 
       var analyserName = value[0].analyserDisplayName || key;
       var summary = `-- ${analyserName} ${getDashes(analyserName)}`;  //format is [-- analyserName ----------] (dashes fill upto 30 chars)
@@ -139,9 +136,8 @@ function reporter(emitter, outputter) {
       var itemTypeStr = pluralise(itemType, value.length);
       var details = `We found ${value.length} ${itemTypeStr}${errStr}`;
 
-      summariesForLang.push({title: summary, details: details});
+      return { title: summary, details: details};
     });
-    return summariesForLang;
 
     function numErrorsForAnalyser(analyser){
       if(_.keys(errByAnalyser).length > 0){
@@ -165,22 +161,18 @@ function reporter(emitter, outputter) {
     }
   }
 
-  function outputSummary(){
-    analyserSummaries.push(getSummariesForLang());
+  function outputSummary() {
+    const analyserSummaries = getSummariesByAnalyser();
+
     spinner.stop(true); //clear console spinner line
 
-    //when we have run all the analysers for all the languages - show summary
-    if(analyserSummaries.length === langCount){
-      outputString(' ');
-      outputString('Analysis summary:', MESSAGE_TYPE.TITLE);
+    outputString(' ');
+    outputString('Analysis summary:', MESSAGE_TYPE.TITLE);
 
-      analyserSummaries.forEach(function(summariesForLang){
-        summariesForLang.forEach(function(summary){
-          outputString('  ' + summary.title, MESSAGE_TYPE.INFO);
-          outputString('  ' + summary.details + '\n', MESSAGE_TYPE.ERROR);
-        });
-      });
-    }
+    analyserSummaries.forEach(function(summary){
+      outputString('  ' + summary.title, MESSAGE_TYPE.INFO);
+      outputString('  ' + summary.details + '\n', MESSAGE_TYPE.ERROR);
+    });
   }
 }
 
