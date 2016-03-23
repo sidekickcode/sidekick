@@ -1,7 +1,7 @@
 "use strict";
 
-const reporter = testRequire(__filename);
-const scenario = require("./scenario");
+const reporter = require("./junit");
+const scenario = require("./scenario.test.js");
 const et = require("elementtree");
 const _ = require("lodash");
 

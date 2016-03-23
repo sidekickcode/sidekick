@@ -4,7 +4,7 @@
   "description": "Your code, made perfect.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha src/*.test.js src/*/*.test.js"
+    "test": "mocha src/*/*.test.js"
   },
   "bin": "sidekick-cli.js",
   "repository": {
@@ -30,13 +30,14 @@
     "bluebird": "~2.9.14",
     "cli-spinner": "^0.2.4",
     "debug": "^2.2.0",
-    "lodash": "^4.6.1",
+    "lodash": "^3.10.1",
     "ttys": "0.0.3",
     "yargs": "^4.3.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
+    "elementtree": "^0.1.6",
     "flow-bin": "^0.22.1",
     "fs-extra": "^0.26.7",
     "mocha": "^2.4.5",
