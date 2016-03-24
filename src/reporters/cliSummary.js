@@ -76,10 +76,10 @@ function reporter(emitter, outputter) {
   });
 
   emitter.on("end", function(){
-    outputSummary();
+    outputSummary(getSummariesByAnalyser());
   });
 
-  //todo needs green ticks and reset to be 1 line per analyser
+  //todo needs to be 1 line per analyser
   emitter.on('downloading', function(data){
     outputString(`Downloading analyser: ${data.analyser}`);
     installLines[data.analyser] = curInstallerLine;
@@ -117,6 +117,10 @@ function reporter(emitter, outputter) {
     cursor.write(str);
   }
 
+  function getMetaByAnalyser(analyser){
+    return _.values(_.groupBy(metas, 'analyser')[analyser]);
+  }
+
   function getSummariesByAnalyser(){
     var issuesByAnalyser = _.groupBy(metas, 'analyser');
     var errByAnalyser = _.groupBy(errors, 'analyser');
@@ -137,7 +141,7 @@ function reporter(emitter, outputter) {
       var itemTypeStr = pluralise(itemType, value.length);
       var details = `We found ${value.length} ${itemTypeStr}${errStr}`;
 
-      return { title: summary, details: details};
+      return { title: summary, details: details, analyser: key};
     });
 
     function numErrorsForAnalyser(analyser){
@@ -162,17 +166,43 @@ function reporter(emitter, outputter) {
     }
   }
 
-  function outputSummary() {
-    const analyserSummaries = getSummariesByAnalyser();
+  function outputMeta(summary) {
+    outputString(' ');
+    outputString('Analysis results:', MESSAGE_TYPE.TITLE);
 
+    summary.forEach(function(summaryLine){
+      outputString(summaryLine.title, MESSAGE_TYPE.INFO);
+      outputString(summaryLine.details + '\n', MESSAGE_TYPE.ERROR);
+
+      var analyserMeta = getMetaByAnalyser(summaryLine.analyser);
+
+      analyserMeta.forEach(function(meta){
+        outputString(meta.path, MESSAGE_TYPE.INFO);
+        outputString(prettifyMeta(meta), MESSAGE_TYPE.ERROR);
+      });
+      outputString('', MESSAGE_TYPE.INFO);
+    });
+
+    function prettifyMeta(meta){
+      var issues = '';
+      meta.issues.forEach(function(issue){
+        issues = `Line ${issue.startLine}: ${issue.message}\n`;
+      });
+      return issues;
+    }
+
+  }
+
+  function outputSummary(summary) {
     spinner.stop(true); //clear console spinner line
 
-    outputString(' ');
+    outputMeta(summary);
+
     outputString('Analysis summary:', MESSAGE_TYPE.TITLE);
 
-    analyserSummaries.forEach(function(summary){
-      outputString('  ' + summary.title, MESSAGE_TYPE.INFO);
-      outputString('  ' + summary.details + '\n', MESSAGE_TYPE.ERROR);
+    summary.forEach(function(summaryLine){
+      outputString('  ' + summaryLine.title, MESSAGE_TYPE.INFO);
+      outputString('  ' + summaryLine.details + '\n', MESSAGE_TYPE.ERROR);
     });
   }
 }
