@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * kicks off - required as browserify build loses the main module
  */
