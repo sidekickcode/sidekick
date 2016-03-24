@@ -8,7 +8,7 @@
     "coverage": "istanbul cover _mocha src/*/*.test.js"
   },
   "bin": {
-    "sidekick": "./sidekick-cli.js"
+    "sidekick": "./sidekick.js"
   },
   "repository": {
     "type": "git",
