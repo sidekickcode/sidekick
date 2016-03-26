@@ -10,30 +10,27 @@
         "tmp",
         "app/browser/vendor"
     ],
-    "languages": [
-        {"js": [
-            {"sidekick-js-todos": {
-                "version": "latest",
-                "failCiOnError": false
-                }
-            },
-            {
-                "sidekick-jscs": {
-                    "version": "latest",
-                    "failCiOnError": false
-                }
-            }
-            ]
+    "languages": {
+      "js": {
+	"sidekick-js-todos": {
+	  "failCiOnError": false
         },
-        {
-            "cs": [
-                {
-                    "sidekick-coffeelint": {
-                        "version": "1.0.1",
-                        "failCiOnError": false
-                    }
-                }
-            ]
+	"sidekick-jscs": {
+	    "failCiOnError": false
+	},
+	"sidekick-eslint": {
+	    "failCiOnError": true
+	}
+      },
+      "cs": {
+	"sidekick-coffeelint": {
+	    "failCiOnError": false
         }
-    ]
+      },
+      "json": {
+	  "sidekick-david": {
+	      "failCiOnError": false
+	  }
+      }
+    }
 }

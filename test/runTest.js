@@ -19,9 +19,7 @@ describe('installer', function() {
   describe('positive tests', function() {
 
     before(function(){
-      fs.removeSync(path.join(__dirname, '../src/analysers/installed'));
       exec(`cd fixtures/testRepo && git init && git add .`, function(err, data){
-
       });
     });
 
@@ -30,13 +28,12 @@ describe('installer', function() {
       this.timeout(40000);
 
       var testRepoPath = path.join(__dirname, '/fixtures/testRepo');
-      var testYargs = {"argv": {
-        "_": ["run", testRepoPath],
-        "ci": true
-      }};
+      run(["run", testRepoPath, '--ci']).then(function(results){
+	done();
+      }, function(err){
+	done();
+      });
 
-      run(testYargs);
-      done();
     });
   });
 });

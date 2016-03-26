@@ -6,6 +6,7 @@
 const chalk = require('chalk');
 const _ = require('lodash');
 const Spinner = require('cli-spinner').Spinner;
+const debug = require('debug')('cliSummary');
 
 const readline = require("readline");
 
@@ -23,7 +24,7 @@ const MESSAGE_TYPE = {
   TITLE: 'magenta'
 };
 
-function reporter(emitter, outputter) {
+function reporter(emitter, outputter, command) {
   var spinner; 
   var processed = 0;
 
@@ -32,6 +33,7 @@ function reporter(emitter, outputter) {
   const output = outputter || defaultOutput;
 
   const ignoreInput = new Readable;
+  ignoreInput._read = _.noop;
 
   var cursor = readline.createInterface({ input: ignoreInput, output: process.stdout });
 
@@ -39,9 +41,12 @@ function reporter(emitter, outputter) {
   var curInstallerLine = 0;
 
   emitter.on("start", function(err, analysis /*: Analysis */){
-    spinner = new Spinner('Analysing..');
-    spinner.start();
-
+    if(command.ci) {
+      outputString('Starting analysis');
+    } else {
+      spinner = new Spinner('Analysing..');
+      spinner.start();
+    }
     // broken
     return;
 
@@ -81,17 +86,21 @@ function reporter(emitter, outputter) {
 
   //todo needs to be 1 line per analyser
   emitter.on('downloading', function(data){
-    outputString(`Downloading analyser: ${data.analyser}`);
+    data = data[0];
+    outputString(`Downloading analyser: ${data.analyser} (${data.version})`);
     installLines[data.analyser] = curInstallerLine;
     curInstallerLine ++;
   });
   emitter.on('downloaded', function(data){
+    data = data[0];
     outputString(`Downloaded analyser: ${data.analyser}`);
   });
   emitter.on('installing', function(data){
+    data = data[0];
     outputString(`Installing analyser: ${data.analyser}`);
   });
   emitter.on('installed', function(data){
+    data = data[0];
     outputString(SUCCESS_TICK + ` Installed analyser: ${data.analyser}`);
   });
 
@@ -194,8 +203,9 @@ function reporter(emitter, outputter) {
   }
 
   function outputSummary(summary) {
-    spinner.stop(true); //clear console spinner line
-
+    if(!command.ci) {
+      spinner.stop(true); //clear console spinner line
+    }
     outputMeta(summary);
 
     outputString('Analysis summary:', MESSAGE_TYPE.TITLE);

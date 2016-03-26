@@ -11,24 +11,31 @@ const Promise = require('bluebird');
 
 const EventEmitter = require("events").EventEmitter;
 
-const yargs = require("yargs");
-
 const proxy = require("@sidekick/common/eventHelpers").proxy;
 const runner = require("@sidekick/runner");
+
+const yargs = require("yargs");
 
 const reporters = Object.create(null);
 reporters["cli-summary"]  = require("./reporters/cliSummary");
 reporters["json-stream"]  = require("./reporters/jsonStream");
 reporters["junit"]        = require("./reporters/junit");
 
-module.exports = exports = function(argv) {
+module.exports = exports = function() {
   const command = parseInput();
   log("command: %j", command);
 
   const events = new EventEmitter;
+  const installEvents = runner.events;
+
+  proxy(events, installEvents, "downloading");
+  proxy(events, installEvents, "downloaded");
+  proxy(events, installEvents, "installing");
+  proxy(events, installEvents, "installed");
+
   const reporter = getReporter(command.reporter);
 
-  reporter(events);
+  reporter(events, null, command);
 
   return git.findRootGitRepo(command.path)
     .catch(git.NotAGitRepo, function() {
@@ -54,6 +61,7 @@ module.exports = exports = function(argv) {
 function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, reporter?: string } */ {
   const argv = yargs
     .boolean("ci")
+    .boolean("noCiExitCode")
     .argv;
 
   const path = argv._[1] || process.cwd();
@@ -72,6 +80,7 @@ function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, repo
   }
 
   cmd.ci = argv.ci;
+  cmd.noCiExitCode = argv.noCiExitCode;
 
   return cmd;
 }
@@ -111,7 +120,7 @@ function runSession(session, command, events) {
   // when the session is finished, we have no more tasks schedules
   // and node should exit
   process.on('exit', function() {
-    const code = yargs.noCiExitCode ? 0
+    const code = command.noCiExitCode ? 0
                                     : (heardIssues ? 1 : 0);
     process.exit(code);
   });

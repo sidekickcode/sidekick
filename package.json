@@ -31,11 +31,11 @@
   },
   "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
-    "@sidekick/analyser-manager": "^1.0.4",
+    "@sidekick/analyser-manager": "^2.0.0",
     "@sidekick/common": "^3.2.0",
     "@sidekick/git-helpers": "^1.0.1",
     "@sidekick/runner": "^0.2.0",
-    "bluebird": "~2.9.14",
+    "bluebird": "^2.9.34",
     "cli-spinner": "^0.2.4",
     "debug": "^2.2.0",
     "lodash": "^3.10.1",
