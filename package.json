@@ -31,25 +31,25 @@
   },
   "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
-    "@sidekick/analyser-manager": "^2.0.0",
-    "@sidekick/common": "^3.2.0",
-    "@sidekick/git-helpers": "^1.0.1",
-    "@sidekick/runner": "^0.2.0",
-    "bluebird": "^2.9.34",
-    "cli-spinner": "^0.2.4",
-    "debug": "^2.2.0",
-    "lodash": "^3.10.1",
+    "@sidekick/analyser-manager": "2.0.0",
+    "@sidekick/common": "3.2.0",
+    "@sidekick/git-helpers": "1.0.1",
+    "@sidekick/runner": "0.2.3",
+    "bluebird": "2.9.34",
+    "cli-spinner": "0.2.4",
+    "debug": "2.2.0",
+    "lodash": "3.10.1",
     "ttys": "0.0.3",
-    "yargs": "^4.3.2"
+    "yargs": "4.3.2"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-as-promised": "^5.2.0",
-    "elementtree": "^0.1.6",
-    "flow-bin": "^0.22.1",
-    "fs-extra": "^0.26.7",
-    "istanbul": "^0.4.2",
-    "mocha": "^2.4.5",
-    "sinon": "^1.17.3"
+    "chai": "3.5.0",
+    "chai-as-promised": "5.2.0",
+    "elementtree": "0.1.6",
+    "flow-bin": "0.22.1",
+    "fs-extra": "0.26.7",
+    "istanbul": "0.4.2",
+    "mocha": "2.4.5",
+    "sinon": "1.17.3"
   }
 }

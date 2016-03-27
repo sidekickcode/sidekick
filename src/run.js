@@ -26,12 +26,6 @@ module.exports = exports = function() {
   log("command: %j", command);
 
   const events = new EventEmitter;
-  const installEvents = runner.events;
-
-  proxy(events, installEvents, "downloading");
-  proxy(events, installEvents, "downloaded");
-  proxy(events, installEvents, "installing");
-  proxy(events, installEvents, "installed");
 
   const reporter = getReporter(command.reporter);
 
@@ -52,6 +46,7 @@ module.exports = exports = function() {
       return runner.session({
         target: target,
         shouldInstall: command.ci,
+        events: events,
       })
 
     })
