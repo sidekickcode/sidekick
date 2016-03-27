@@ -8,4 +8,5 @@ notifications:
 
 script:
   - npm test 
-  - node sidekick run --ci
+  - ./sidekick.js -v
+  - ./sidekick.js run .
