@@ -31,10 +31,10 @@
   },
   "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
-    "@sidekick/analyser-manager": "2.0.0",
+    "@sidekick/analyser-manager": "2.1.0",
     "@sidekick/common": "3.2.0",
     "@sidekick/git-helpers": "1.0.1",
-    "@sidekick/runner": "0.2.3",
+    "@sidekick/runner": "0.2.4",
     "bluebird": "2.9.34",
     "cli-spinner": "0.2.4",
     "debug": "2.2.0",
