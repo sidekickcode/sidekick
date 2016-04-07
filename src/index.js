@@ -64,6 +64,7 @@ function run() {
   process.on("unhandledRejection", function(err) {
     log("unhandled promise rejection! " + err.stack || err);
     tracking.error(err);
+    write('Unexpected failure: ' + err.message);
   });
 
 

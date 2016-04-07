@@ -107,7 +107,7 @@ function runSession(session, command, events) {
 
   analysis.on("start", function(err, data) {
     log('heard analysisStart');
-    events.emit("start", err, data);
+    events.emit("start", err, data, analysis);
   });
 
   analysis.on("fileAnalyserEnd", emitResultForReporter);
@@ -222,9 +222,9 @@ usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] 
 
 Compare and Versus
 
-    Without a --versus, simply analyses all files in the repo. with --versus compares current working copy (i.e the files
-    in the repo, commited or not) vs specified commit. With both --versus and --compare, will analyse changes
-    that have happened since the commit at versus, until the commit at compare.
+    Without a --versus, simply analyses all files in the repo. with --versus compares current working copy 
+    (i.e the files in the repo, committed or not) vs specified commit. With both --versus and --compare,
+    will analyse changes that have happened since the commit at versus, until the commit at compare.
 
   Examples
 
@@ -234,19 +234,20 @@ Compare and Versus
 
 CI
 
-    With --ci flag, sk will install all analysers specified in your .sidekickrc file. If an analyser relies on a config
-    file, e.g. '.eslintrc', these settings will be used. If no config can be found then Sidekick default settings will be used.
+    With --ci flag, sk will install all analysers specified in your .sidekickrc file. If an analyser relies
+    on a config file, e.g. '.eslintrc', these settings will be used. If no config can be found then Sidekick
+    default settings will be used.
 
 Reporters
 
     Without --reporter, a summary reporter will be used that totals up the issues found.
 
-    json-stream - a stream of newline deliminated JSON: http://ndjson.org
+    json-stream - a stream of newline delimited JSON: http://ndjson.org
 
                   e.g {}\\n{}\\n{}
 
-    junit       - junit compatible XML. incremental results, emitting a <testcase> per analyser per file (i.e every (file, analyser) pair), with
-                  <failure> elements per issue found.
+    junit       - junit compatible XML. incremental results, emitting a <testcase> per analyser per file
+                  (i.e every (file, analyser) pair), with <failure> elements per issue found.
 
 Exit code
 

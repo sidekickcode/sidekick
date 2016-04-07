@@ -40,23 +40,25 @@ function reporter(emitter, outputter, command) {
   var installLines = {};
   var curInstallerLine = 0;
 
-  emitter.on("start", function(err, analysis /*: Analysis */){
+  emitter.on("start", function(err, data, analysis /*: Analysis */){
     if(command.ci) {
       outputString('Starting analysis');
     } else {
       spinner = new Spinner('Analysing..');
       spinner.start();
     }
+    var langCount; // = analysis.plan.raw.byAnalysers.length;
+    var analyserCount;
+    var fileCount;
+
+    //debug('analysis: ' + langCount + " : " + analyserCount + " : " + fileCount);
     // broken
     return;
 
-    var fileStr = pluralise('file', data.paths.length);
-    var analyserCount = data.analysers.length;
+    var fileStr = pluralise('file', fileCount);
     var analyserStr = pluralise('analyser', analyserCount);
-
-    langCount = data.languages.length;
-    var timeStr = ` (should take about ${timeToRun(data.paths.length)})`;
-    var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${data.paths.length} ${fileStr}${timeStr}.`;
+    var timeStr = ` (should take about ${timeToRun(fileCount)})`;
+    var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${fileCount} ${fileStr}${timeStr}.`;
     outputString(title);
 
 
@@ -135,7 +137,6 @@ function reporter(emitter, outputter, command) {
     var errByAnalyser = _.groupBy(errors, 'analyser');
 
     return _.map(issuesByAnalyser, function(value, key){
-
       var analyserName = value[0].analyserDisplayName || key;
       var summary = `-- ${analyserName} ${getDashes(analyserName)}`;  //format is [-- analyserName ----------] (dashes fill upto 30 chars)
 
@@ -145,12 +146,18 @@ function reporter(emitter, outputter, command) {
         errStr = ` (but couldn\'t analyse ${numErrors} ${pluralise('file', numErrors)}).`;
       }
 
+      var totalIssues = _.reduce(value, function(acc, perFile){
+        return acc + perFile.issues.length;
+      }, 0);
+
+      debug('val: ' + JSON.stringify(value));
+
       //some analysers specify an itemType for their annotations, e.g. 'security violation'
       var itemType = value[0].analyserItemType || 'issue';  //each annotation for an analyser will have the same itemType (if specified)
-      var itemTypeStr = pluralise(itemType, value.length);
-      var details = `We found ${value.length} ${itemTypeStr}${errStr}`;
+      var itemTypeStr = pluralise(itemType, totalIssues);
+      var details = `We found ${totalIssues} ${itemTypeStr}${errStr}`;
 
-      return { title: summary, details: details, analyser: key};
+      return { title: summary, details: details, analyser: key, totalIssues: totalIssues};
     });
 
     function numErrorsForAnalyser(analyser){
@@ -186,8 +193,10 @@ function reporter(emitter, outputter, command) {
       var analyserMeta = getMetaByAnalyser(summaryLine.analyser);
 
       analyserMeta.forEach(function(meta){
-        outputString(meta.path, MESSAGE_TYPE.INFO);
-        outputString(prettifyMeta(meta), MESSAGE_TYPE.ERROR);
+        if(meta.issues.length > 0){
+          outputString(meta.path);
+          outputString(prettifyMeta(meta), MESSAGE_TYPE.ERROR);
+        }
       });
       outputString('', MESSAGE_TYPE.INFO);
     });
@@ -195,7 +204,7 @@ function reporter(emitter, outputter, command) {
     function prettifyMeta(meta){
       var issues = '';
       meta.issues.forEach(function(issue){
-        issues = `Line ${issue.startLine}: ${issue.message}\n`;
+        issues += `Line ${issue.startLine}: ${issue.message}\n`;
       });
       return issues;
     }
@@ -208,7 +217,10 @@ function reporter(emitter, outputter, command) {
     }
     outputMeta(summary);
 
-    outputString('Analysis summary:', MESSAGE_TYPE.TITLE);
+    var totalIssues = _.reduce(summary, function(acc, val){
+      return acc + val.totalIssues;
+    }, 0);
+    outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
 
     summary.forEach(function(summaryLine){
       outputString('  ' + summaryLine.title, MESSAGE_TYPE.INFO);
@@ -221,7 +233,7 @@ function pluralise(str, count){
   var suffix = 's'; //e.g. issue becomes issues
   if(_.endsWith(str, 'y')){
     suffix = 'ies'; //e.g. dependency becomes dependencies
-    return count === 1 ? str : str.substr(0, length(str) - 1) + suffix;
+    return count === 1 ? str : str.substr(0, str.length - 1) + suffix;
   } else {
     return count === 1 ? str : str + suffix;
   }
