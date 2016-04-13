@@ -34,7 +34,7 @@
     "@sidekick/analyser-manager": "2.1.0",
     "@sidekick/common": "3.3.0",
     "@sidekick/git-helpers": "1.0.1",
-    "@sidekick/runner": "0.2.4",
+    "@sidekick/runner": "0.2.5",
     "bluebird": "2.9.34",
     "cli-spinner": "0.2.4",
     "debug": "2.2.0",
