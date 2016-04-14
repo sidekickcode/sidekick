@@ -138,10 +138,9 @@ function runSession(session, command, events) {
         analyser: analyser.analyser,
         error: err,
       });
-
     } else {
       // if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
-      if(!command.ci || analyser.failsCiOnError !== false) {
+      if(!command.ci || analyser.failCiOnError !== false) {
         heardIssues = heardIssues || issues.meta.length > 0;
       }
 
