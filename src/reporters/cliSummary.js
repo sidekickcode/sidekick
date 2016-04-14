@@ -31,6 +31,7 @@ function reporter(emitter, outputter, command) {
   const metas = [];
   const errors = [];
   const output = outputter || defaultOutput;
+  const canFail = [];
 
   const ignoreInput = new Readable;
   ignoreInput._read = _.noop;
@@ -89,6 +90,9 @@ function reporter(emitter, outputter, command) {
   //todo needs to be 1 line per analyser
   emitter.on('downloading', function(data){
     data = data[0];
+    if(data.canFailCi){
+      canFail.push(data.analyser);
+    }
     outputString(`Downloading analyser: ${data.analyser} (${data.version})`);
     installLines[data.analyser] = curInstallerLine;
     curInstallerLine ++;
@@ -157,7 +161,7 @@ function reporter(emitter, outputter, command) {
       var itemTypeStr = pluralise(itemType, totalIssues);
       var details = `We found ${totalIssues} ${itemTypeStr}${errStr}`;
 
-      return { title: summary, details: details, analyser: key, totalIssues: totalIssues};
+      return {title: summary, details: details, analyser: key, totalIssues: totalIssues};
     });
 
     function numErrorsForAnalyser(analyser){
@@ -223,9 +227,17 @@ function reporter(emitter, outputter, command) {
     outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
 
     summary.forEach(function(summaryLine){
-      outputString('  ' + summaryLine.title, MESSAGE_TYPE.INFO);
+      outputString(`  ${summaryLine.title} ${getCanFailStr(summaryLine.analyser)}`, MESSAGE_TYPE.INFO);
       outputString('  ' + summaryLine.details + '\n', MESSAGE_TYPE.ERROR);
     });
+
+    function getCanFailStr(analyserName){
+      if(command.ci && _.indexOf(canFail, analyserName) !== -1){
+        return `(will fail build)`;
+      } else {
+        return '';
+      }
+    }
   }
 }
 

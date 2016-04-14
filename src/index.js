@@ -65,6 +65,7 @@ function run() {
     log("unhandled promise rejection! " + err.stack || err);
     tracking.error(err);
     write('Unexpected failure: ' + err.message);
+    process.exit(1);
   });
 
 
@@ -92,6 +93,7 @@ function run() {
 function handleUnexpectedException(err) {
   log("uncaughtException! " + err.stack || err);
   tracking.error(err);
+  process.exit(1);
 }
 
 function showHelp() {
