@@ -113,10 +113,16 @@ function runSession(session, command, events) {
 
   // when the session is finished, we have no more tasks schedules
   // and node should exit
-  process.on('exit', function() {
-    const code = command.noCiExitCode ? 0
-                                    : (heardIssues ? 1 : 0);
-    process.exit(code);
+  process.on('exit', function(code) {
+    if(code !== 0) {
+      // leave it as is, we're exiting as a result of failure elsewhere
+      return;
+    }
+    const runExitCode = command.noCiExitCode ? 0
+                                      : (heardIssues ? 1 : 0);
+
+    log(`run changing process exit code to: ${runExitCode}, heardIssues ${heardIssues}, --no-ci-exit-code=${command.noCiExitCode}`);
+    process.exit(runExitCode);
   });
 
   analysis.on("end", function() {
