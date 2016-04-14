@@ -11,4 +11,4 @@ script:
   - npm test 
   - ./sidekick.js -v
   - echo If you are looking at this build config as an example of how to comfigure Sidekick on ci - be aware that the correct invocation is sidekick run --ci
-  - ./sidekick.js run .
+  - DEBUG=* ./sidekick.js run .
