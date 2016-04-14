@@ -160,8 +160,9 @@ function reporter(emitter, outputter, command) {
       var itemType = value[0].analyserItemType || 'issue';  //each annotation for an analyser will have the same itemType (if specified)
       var itemTypeStr = pluralise(itemType, totalIssues);
       var details = `We found ${totalIssues} ${itemTypeStr}${errStr}`;
+      var failIssues = _.indexOf(canFail, analyserName) !== -1 ? totalIssues : 0;
 
-      return {title: summary, details: details, analyser: key, totalIssues: totalIssues};
+      return {title: summary, details: details, analyser: key, totalIssues: totalIssues, failIssues: failIssues};
     });
 
     function numErrorsForAnalyser(analyser){
@@ -224,7 +225,16 @@ function reporter(emitter, outputter, command) {
     var totalIssues = _.reduce(summary, function(acc, val){
       return acc + val.totalIssues;
     }, 0);
-    outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
+
+    var failIssues = _.reduce(summary, function(acc, val){
+      return acc + val.failIssues;
+    }, 0);
+
+    if(command.ci){
+      outputString(`Analysis summary: ${failIssues} ${pluralise('issue', failIssues)} found that will break the build (${totalIssues} other ${pluralise('issue', totalIssues)} found)`, MESSAGE_TYPE.TITLE);
+    } else {
+      outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
+    }
 
     summary.forEach(function(summaryLine){
       outputString(`  ${summaryLine.title} ${getCanFailStr(summaryLine.analyser)}`, MESSAGE_TYPE.INFO);
