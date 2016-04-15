@@ -48,20 +48,25 @@ function reporter(emitter, outputter, command) {
       spinner = new Spinner('Analysing..');
       spinner.start();
     }
-    var langCount; // = analysis.plan.raw.byAnalysers.length;
-    var analyserCount;
-    var fileCount;
 
-    //debug('analysis: ' + langCount + " : " + analyserCount + " : " + fileCount);
-    // broken
-    return;
+    try {
+      var langCount = analysis.plan.raw.byAnalysers.length;
+      var analyserCount = _.reduce(analysis.plan.raw.byAnalysers, function(sum, analysersForLang){
+        return sum + analysersForLang.analysers.length;
+      }, 0);
 
-    var fileStr = pluralise('file', fileCount);
-    var analyserStr = pluralise('analyser', analyserCount);
-    var timeStr = ` (should take about ${timeToRun(fileCount)})`;
-    var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${fileCount} ${fileStr}${timeStr}.`;
-    outputString(title);
+      var fileCount = _.reduce(analysis.plan.raw.byAnalysers, function(sum, analysersForLang){
+        return sum + (analysersForLang.analysers.length * analysersForLang.paths.length);
+      }, 0);
 
+      debug(`analysis: ${langCount} : ${analyserCount} : ${fileCount}`);
+
+      var fileStr = pluralise('file', fileCount);
+      var analyserStr = pluralise('analyser', analyserCount);
+      var timeStr = ` (should take about ${timeToRun(fileCount)})`;
+      var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${fileCount} ${fileStr}${timeStr}.`;
+      outputString(title);
+    } catch (e){} //not the end of the world if we cant get timings
 
     function timeToRun(fileCount){
       if(fileCount < 60){
@@ -72,6 +77,7 @@ function reporter(emitter, outputter, command) {
         return `${parseInt( Math.floor(fileCount / 60))} minutes`;
       }
     }
+
   });
 
   emitter.on("result", function(meta){
