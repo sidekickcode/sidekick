@@ -61,12 +61,13 @@ function reporter(emitter, outputter, command) {
     } catch (e){} //not the end of the world if we cant get timings
 
     function timeToRun(fileCount){
-      if(fileCount < 60){
-        return `${fileCount} ${pluralise('second', fileCount)}`;
-      } else if(fileCount <=90) {
-        return 'a minute and a half';
+      var realCount = parseInt(fileCount / 3);  //takes about 300ms to do a job
+      if(realCount < 20){
+        return `${realCount} ${pluralise('second', realCount)}`;
+      } else if(realCount <=30) {
+        return '30 seconds';
       } else {
-        return `${parseInt( Math.floor(fileCount / 60))} minutes`;
+        return `${parseInt(Math.floor(realCount / 60))} minutes`;
       }
     }
 
