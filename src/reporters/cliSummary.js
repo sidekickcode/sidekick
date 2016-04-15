@@ -86,7 +86,7 @@ function reporter(emitter, outputter, command) {
     outputSummary(getSummariesByAnalyser());
   });
 
-  //todo needs to be 1 line per analyser
+  //TODO needs to be 1 line per analyser
   emitter.on('downloading', function(data){
     data = data[0];
     if(data.canFailCi){
