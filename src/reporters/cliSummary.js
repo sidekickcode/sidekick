@@ -50,21 +50,13 @@ function reporter(emitter, outputter, command) {
     }
 
     try {
-      var langCount = analysis.plan.raw.byAnalysers.length;
-      var analyserCount = _.reduce(analysis.plan.raw.byAnalysers, function(sum, analysersForLang){
-        return sum + analysersForLang.analysers.length;
-      }, 0);
-
-      var fileCount = _.reduce(analysis.plan.raw.byAnalysers, function(sum, analysersForLang){
+      var jobCount = _.reduce(analysis.plan.raw.byAnalysers, function(sum, analysersForLang){
         return sum + (analysersForLang.analysers.length * analysersForLang.paths.length);
       }, 0);
 
-      debug(`analysis: ${langCount} : ${analyserCount} : ${fileCount}`);
-
-      var fileStr = pluralise('file', fileCount);
-      var analyserStr = pluralise('analyser', analyserCount);
-      var timeStr = ` (should take about ${timeToRun(fileCount)})`;
-      var title = `${chalk.green('Sidekick')} is running ${analyserCount} ${analyserStr} against ${fileCount} ${fileStr}${timeStr}.`;
+      var jobStr = pluralise('job', jobCount);
+      var timeStr = ` (should take about ${timeToRun(jobCount)})`;
+      var title = `${chalk.green('Sidekick')} is running ${jobCount} analysis ${jobStr}${timeStr}.`;
       outputString(title);
     } catch (e){} //not the end of the world if we cant get timings
 
