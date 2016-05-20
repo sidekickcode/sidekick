@@ -1,8 +1,5 @@
 "use strict";
 
-// NOTE - do not require anything else before logs, to ensure all
-// logs go to correct place
-//const settings = require("../../common/settings");
 const VERSION = require("../package.json").version;
 
 const log = require("debug")("cli");
@@ -16,6 +13,7 @@ exports.run = run;
 const commands = Object.create(null);
 commands.version = showVersion;
 commands.help = helpCommand;
+commands.open = require("./open");
 commands.run = require("./run");
 commands.analysers = require("./analysers");
 commands.config = require("./config");
