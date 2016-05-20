@@ -39,6 +39,7 @@ exports.hasConfigValidation = function hasConfig(path) {
     return new Exit(1, `could not parse ".sidekickrc" as JSON, "${err.message}"`);
   })
   .catch(function(err) {
+    debug("failed: " + err.message);
     const msg = missingConfigErrorMessages(err);
     return new Exit(1, msg);
   });

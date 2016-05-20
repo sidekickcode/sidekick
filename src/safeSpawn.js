@@ -1,7 +1,7 @@
 /**
  * child_process.spawn with extra assurances the process started correctly
  *
- * we give assurances via simple contract the other process follows ot let us know when it's ready:
+ * we give assurances via simple contract the other process follows to let us know when it's ready:
  *
  * if up and everything is ok, output this line
  *

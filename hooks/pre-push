@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# dev
+DEVELOPMENT=0
+PREVENT_PUSH=0
+OFFLINE=0
+
+development() {
+  SK_DEBUG=1 DEVELOPMENT=1 iojs ~/dev/sk/deployed/app/cli/ui pre-push $@
+}
+
+installed() {
+  # sidekick prepush analysis
+  sk prepush $@
+}
+
+
+input() {
+  if [[ $OFFLINE == "1" ]]; then
+    branch=$(git status | head -n 1 | sed 's/On branch //')
+    local=$(sha HEAD)
+    remote=$(sha HEAD~5)
+    echo refs/heads/$branch $local refs/heads/$branch $remote
+  fi
+}
+
+sha() {
+  git show $1 --format=%H | head -n 1
+}
+
+args="$@"
+if [[ $OFFLINE == "1" ]]; then
+  branch=$(git show | head -n 1 | sed 's/On branch //')
+  args="$branch $branch"
+fi
+
+if [[ $DEVELOPMENT == "1" ]]; then
+  echo "running vs working copy"
+  if [[ $OFFLINE == "1" ]]; then
+    input | development $args
+  else
+    development $args
+  fi
+else
+  echo "running vs installed copy"
+  if [[ $OFFLINE == "1" ]]; then
+    input | installed $args
+  else
+    installed $args
+  fi
+fi
+
+sk_exit=$?
+
+if [[ $PREVENT_PUSH == "1" && $sk_exit == "0" ]]; then
+  echo "preventing push as sk exited with $sk_exit"
+  exit 1
+fi
+
+exit $sk_exit
