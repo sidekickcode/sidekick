@@ -196,7 +196,7 @@ function createGitTarget(command, repoPath) {
 
   function validate(commitish, name) {
     if(commitish) {
-      return parseCommitish(command.repoPath, commitish)
+      return git.parseCommitish(command.repoPath, commitish)
         .catch(function(e) {
           return Error(`cannot parse '${commitish}' as commitsh value for '--${name}'`);
         });
