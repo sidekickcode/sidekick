@@ -215,7 +215,11 @@ function reporter(emitter, outputter, command) {
     function prettifyMeta(meta){
       var issues = '';
       meta.issues.forEach(function(issue){
-        issues += `Line ${issue.startLine}: ${issue.message}\n`;
+        if(issue.startLine > -1) {
+          issues += `Line ${issue.startLine}: ${issue.message}\n`;
+        } else {
+          issues += `${issue.message}\n`;
+        }
       });
       return issues;
     }
@@ -237,6 +241,7 @@ function reporter(emitter, outputter, command) {
     }, 0);
 
     if(command.ci){
+      totalIssues = totalIssues - failIssues;
       outputString(`Analysis summary: ${failIssues} ${pluralise('issue', failIssues)} found that will break the build (${totalIssues} other ${pluralise('issue', totalIssues)} found)`, MESSAGE_TYPE.TITLE);
     } else {
       outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
