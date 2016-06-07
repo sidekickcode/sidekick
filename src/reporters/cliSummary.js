@@ -58,6 +58,7 @@ function reporter(emitter, outputter, command) {
       var timeStr = ` (should take about ${timeToRun(jobCount)})`;
       var title = `${chalk.green('Sidekick')} is running ${jobCount} analysis ${jobStr}${timeStr}.`;
       outputString(title);
+
     } catch (e){} //not the end of the world if we cant get timings
 
     function timeToRun(fileCount){
@@ -67,7 +68,8 @@ function reporter(emitter, outputter, command) {
       } else if(realCount <=30) {
         return '30 seconds';
       } else {
-        return `${parseInt(Math.floor(realCount / 60))} minutes`;
+        var minutes = parseInt(Math.floor(realCount / 60));
+        return `${minutes} ${pluralise('minute', minutes)}`;
       }
     }
 
@@ -86,9 +88,14 @@ function reporter(emitter, outputter, command) {
     outputSummary(getSummariesByAnalyser());
   });
 
+  emitter.on('message', function(message){
+    outputString(message);
+  });
+
   //TODO needs to be 1 line per analyser
   emitter.on('downloading', function(data){
     data = data[0];
+    debug(JSON.stringify(data));
     if(data.canFailCi){
       canFail.push(data.analyser);
     }

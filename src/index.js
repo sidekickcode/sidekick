@@ -17,7 +17,7 @@ const commands = Object.create(null);
 commands.version = showVersion;
 commands.help = helpCommand;
 commands.run = require("./run");
-
+commands.analysers = require("./analysers");
 
 const help = 
 `usage: sk <command> [ arg, ... ]
@@ -33,6 +33,12 @@ const help =
     sk run --versus origin/master                # working copy vs latest fetched commit from origin/master
     sk run --versus head~5                       # working copy vs 5 commits ago
     sk run --compare HEAD --versus head~5        # current commit vs 5 commits ago
+
+  sk analysers [ --install ]
+  
+    outputs information on the installed analysers
+    
+    with --install will install all available analysers
 
   sk help [ command ]
   sk command -h --help
