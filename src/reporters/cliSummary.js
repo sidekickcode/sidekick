@@ -147,6 +147,7 @@ function reporter(emitter, outputter, command) {
     var errByAnalyser = _.groupBy(errors, 'analyser');
 
     return _.map(issuesByAnalyser, function(value, key){
+      const analyserFullname = value[0].analyser;
       var analyserName = value[0].analyserDisplayName || key;
       var summary = `-- ${analyserName} ${getDashes(analyserName)}`;  //format is [-- analyserName ----------] (dashes fill upto 30 chars)
 
@@ -166,7 +167,9 @@ function reporter(emitter, outputter, command) {
       var itemType = value[0].analyserItemType || 'issue';  //each annotation for an analyser will have the same itemType (if specified)
       var itemTypeStr = pluralise(itemType, totalIssues);
       var details = `We found ${totalIssues} ${itemTypeStr}${errStr}`;
-      var failIssues = _.indexOf(canFail, analyserName) !== -1 ? totalIssues : 0;
+      var failIssues = _.indexOf(canFail, analyserFullname) !== -1 ? totalIssues : 0;
+
+      debug(`total: ${totalIssues}, fail: ${failIssues}`);
 
       return {title: summary, details: details, analyser: key, totalIssues: totalIssues, failIssues: failIssues};
     });
@@ -241,8 +244,8 @@ function reporter(emitter, outputter, command) {
     }, 0);
 
     if(command.ci){
-      totalIssues = totalIssues - failIssues;
-      outputString(`Analysis summary: ${failIssues} ${pluralise('issue', failIssues)} found that will break the build (${totalIssues} other ${pluralise('issue', totalIssues)} found)`, MESSAGE_TYPE.TITLE);
+      const otherIssues = totalIssues - failIssues;
+      outputString(`Analysis summary: ${failIssues} ${pluralise('issue', failIssues)} found that will break the build (${otherIssues} other ${pluralise('issue', otherIssues)} found)`, MESSAGE_TYPE.TITLE);
     } else {
       outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
     }
