@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/sidekickcode/sidekick#readme",
   "dependencies": {
-    "@sidekick/analyser-manager": "2.0.9",
+    "@sidekick/analyser-manager": "2.2.1",
     "@sidekick/common": "3.3.1",
     "@sidekick/git-helpers": "1.0.1",
     "@sidekick/runner": "0.2.10",
