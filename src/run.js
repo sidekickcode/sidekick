@@ -13,6 +13,8 @@ const EventEmitter = require("events").EventEmitter;
 
 const runner = require("@sidekick/runner");
 
+const userSettings = require('@sidekick/common/userSettings');
+
 const yargs = require("yargs");
 
 const reporters = Object.create(null);
@@ -30,26 +32,35 @@ module.exports = exports = function() {
 
   reporter(events, null, command);
 
-  return git.findRootGitRepo(command.path)
-    .catch(git.NotAGitRepo, function() {
-      return doExit(1, "sk run must be run on a git repo");
-    })
-    .then(function createTarget(repoPath) {
-      return createGitTarget(command, repoPath)
-    })
-    .catch(fail)
-    .then(function(target) {
+  userSettings.load();
 
-      log("starting analysis with %j", target);
+  userSettings.isGitReachable()
+    .then(function(){
+      git.setGitBin(userSettings.getGitBin());
 
-      return runner.session({
-        target: target,
-        shouldInstall: command.ci,
-        events: events,
-      })
+      return git.findRootGitRepo(command.path)
+          .catch(git.NotAGitRepo, function() {
+            return doExit(1, "sidekick run must be run on a git repo");
+          })
+          .then(function createTarget(repoPath) {
+            return createGitTarget(command, repoPath)
+          })
+          .catch(fail)
+          .then(function(target) {
 
-    })
-    .then((session) => runSession(session, command, events))
+            log("starting analysis with %j", target);
+
+            return runner.session({
+              target: target,
+              shouldInstall: command.ci,
+              events: events,
+            })
+
+          })
+          .then((session) => runSession(session, command, events))
+    }, function(err){
+      return doExit(1, "Cannot run analysis - unable to find git at: " + userSettings.getGitBin());
+    });
 }
 
 function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, reporter?: string } */ {
