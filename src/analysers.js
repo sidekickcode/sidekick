@@ -33,10 +33,11 @@ module.exports = exports = function() {
 
   reporter(events, null, command);
 
+  const INSTALL_LOCATION = path.join(os.userDataPath(), '/installed_analysers');
+  const AM = new analyserManager(INSTALL_LOCATION);
+
   if(command.installAnalysers){
-    const INSTALL_LOCATION = path.join(os.userDataPath(), '/installed_analysers');
     events.emit('message', 'Fetching list of analysers to install..');
-    const AM = new analyserManager(INSTALL_LOCATION);
 
     proxy({
       from: AM,
@@ -64,7 +65,15 @@ module.exports = exports = function() {
           })
       });
   } else {
-    //return list of installed analysers
+    log('fetching analyser list');
+    AM.init()
+      .then(() => {
+        //return list of installed analysers
+        const allInstalledAnalysers = AM.getAllInstalledAnalysers();
+        log('have installed analysers: ' + JSON.stringify(allInstalledAnalysers));
+        const analyserList = allInstalledAnalysers.join('\n  ');
+        events.emit('message', `\nWe found ${allInstalledAnalysers.length} installed analysers:\n\n  ${analyserList}\n`);
+      });
   }
 
   function getAllAnalysers(analyserConfigs){
@@ -142,4 +151,3 @@ Installation
 
     With the --install flag, all available analysers will be installed.
 `;
-

@@ -4,10 +4,15 @@
 
 Sidekick - your code, made perfect.
 
+## Pre-requisites
+
+We need `git` to be installed on your machine.
+
+
 ## Installation
 
 ```sh
-npm install -g sidekick
+npm i sidekick -g
 ```
 
 ## Initialisation
@@ -17,6 +22,19 @@ Sidekick does not ship with any analysers, so you will need to install them. Its
 ```sh
 sidekick analysers --install
 ```
+
+You can check that your system is configured correctly:
+
+```sh
+sidekick config
+```
+
+If `git` is not available on your path, then you will need to tell us where it has been installed to:
+
+```sh
+sidekick config --git=/some/path/to/git
+```
+
 
 ## Usage
 

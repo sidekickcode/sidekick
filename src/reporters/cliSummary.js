@@ -10,7 +10,9 @@ const debug = require('debug')('cliSummary');
 
 const readline = require("readline");
 
-const SUCCESS_TICK = chalk.green("✔");
+const os = require('@sidekick/common/os');
+
+const SUCCESS_TICK = chalk.green(os.isPosix() ? "✔" : "√");
 
 module.exports = exports = reporter;
 
@@ -88,8 +90,8 @@ function reporter(emitter, outputter, command) {
     outputSummary(getSummariesByAnalyser());
   });
 
-  emitter.on('message', function(message){
-    outputString(message);
+  emitter.on('message', function(message, colour){
+    outputString(message, colour);
   });
 
   //TODO needs to be 1 line per analyser
