@@ -1,5 +1,9 @@
 {
+  "global": {
+    "assert": false
+  },
   "env": {
+    "mocha": true,
     "node": true
   },
   "parserOptions": {
