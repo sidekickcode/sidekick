@@ -46,6 +46,14 @@ sidekick run --ci
 
 This will install all the analysers that are needed, run them against your code and optionally fail the build.
 
+#### Travis integration
+
+```sh
+sidekick run --travis
+```
+
+Will analyse just the changes that prompted the travis build.
+
 ###You can run Sidekick against code on your machine:
 
 ```sh

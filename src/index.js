@@ -34,6 +34,7 @@ const help =
     sidekick run --versus origin/master                # working copy vs latest fetched commit from origin/master
     sidekick run --versus head~5                       # working copy vs 5 commits ago
     sidekick run --compare HEAD --versus head~5        # current commit vs 5 commits ago
+    sk run --travis                                    # travis integration - only analyses code that changed in PR etc (will set --ci if not set to false)
 
   sidekick config [ --git ]
   
