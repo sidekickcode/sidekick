@@ -36,4 +36,5 @@ describe('installer', function() {
 
     });
   });
+
 });

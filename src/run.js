@@ -23,7 +23,18 @@ reporters["json-stream"]  = require("./reporters/jsonStream");
 reporters["junit"]        = require("./reporters/junit");
 
 module.exports = exports = function() {
-  const command = parseInput();
+  const argv = yargs
+    .boolean("ci")
+    .boolean("travis")
+    .boolean("noCiExitCode")
+    .argv;
+
+  const path = argv._[1] || process.cwd();
+  const command = flagsToCommand(path, argv);
+  if(command instanceof Error) {
+    return doExit(1, command.message);
+  }
+
   log("command: %j", command);
 
   const events = new EventEmitter;
@@ -63,17 +74,18 @@ module.exports = exports = function() {
     });
 }
 
-function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, reporter?: string } */ {
-  const argv = yargs
-    .boolean("ci")
-    .boolean("noCiExitCode")
-    .argv;
+exports.flagsToCommand = flagsToCommand;
 
-  const path = argv._[1] || process.cwd();
+function flagsToCommand(path, argv) /*: { versus?: string, compare?: string, ci: Boolean, reporter?: string } | Error */ {
+
   const cmd = {
     path: path,
     reporter: argv.reporter,
   };
+
+  if(argv.travis && (argv.versus || argv.compare)) {
+    return Error("travis integration determines commit range - do not supply --versus or --compare");
+  }
 
   // will later be replaced by commit values
   if(argv.versus) {
@@ -86,6 +98,11 @@ function parseInput() /*: { versus?: string, compare?: string, ci: Boolean, repo
 
   cmd.ci = argv.ci;
   cmd.noCiExitCode = argv.noCiExitCode;
+  cmd.travis = argv.travis;
+  if(!('ci' in argv) && cmd.travis) {
+    cmd.ci = true;
+  }
+
 
   return cmd;
 }
@@ -170,6 +187,7 @@ function runSession(session, command, events) {
 }
 
 function createGitTarget(command, repoPath) {
+  command = travis(command)
   const validated = _.mapValues(_.pick(command, "versus", "compare"), validate);
 
   return Promise.props(validated)
@@ -204,6 +222,24 @@ function createGitTarget(command, repoPath) {
       return `missing value for '--${name}'`;
     }
   }
+
+  function travis(command) {
+    if(!command.travis) {
+      return command;
+    }
+
+    if(process.env.TRAVIS_COMMIT_RANGE) {
+      // travis' commit range is '...' incorrectly - https://github.com/travis-ci/travis-ci/issues/4596
+      const headBase = process.env.TRAVIS_COMMIT_RANGE.split(/\.{2,3}/);
+
+      return _.defaults({
+        compare: headBase[0],
+        versus: headBase[1],
+      }, command);
+    }
+
+    return command;
+  }
 }
 
 function outputError(e) {
@@ -231,7 +267,7 @@ function fail(err) {
 }
 
 exports.help = `
-usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --no-ci-exit-code ]
+usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --no-ci-exit-code ] [ --travis ]
 
     Runs sk in cli mode, reporting results via reporter.
 
@@ -246,6 +282,7 @@ Compare and Versus
     sk run --versus origin/master                # working copy vs latest fetched commit from origin/master
     sk run --versus head~5                       # working copy vs 5 commits ago
     sk run --compare HEAD --versus head~5        # current commit vs 5 commits ago
+    sk run --travis                              # travis integration - only analyses code that changed in PR etc (will set --ci if not set to false)
 
 CI
 
