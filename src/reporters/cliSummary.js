@@ -23,7 +23,8 @@ const defaultOutput = (x) => console.log(x);
 const MESSAGE_TYPE = {
   INFO : 'cyan',
   ERROR : 'yellow',
-  TITLE: 'magenta'
+  TITLE: 'magenta',
+  FATAL: 'red',
 };
 
 function reporter(emitter, outputter, command) {
@@ -56,10 +57,14 @@ function reporter(emitter, outputter, command) {
         return sum + (analysersForLang.analysers.length * analysersForLang.paths.length);
       }, 0);
 
-      var jobStr = pluralise('job', jobCount);
-      var timeStr = ` (should take about ${timeToRun(jobCount)})`;
-      var title = `${chalk.green('Sidekick')} is running ${jobCount} analysis ${jobStr}${timeStr}.`;
-      outputString(title);
+      if(jobCount === 0){
+        outputString(`No files that need to be analysed :-(`)
+      } else {
+        var jobStr = pluralise('job', jobCount);
+        var timeStr = ` (should take about ${timeToRun(jobCount)})`;
+        var title = `${chalk.green('Sidekick')} is running ${jobCount} analysis ${jobStr}${timeStr}.`;
+        outputString(title);
+      }
 
     } catch (e){} //not the end of the world if we cant get timings
 
@@ -247,19 +252,23 @@ function reporter(emitter, outputter, command) {
 
     if(command.ci){
       const otherIssues = totalIssues - failIssues;
-      outputString(`Analysis summary: ${failIssues} ${pluralise('issue', failIssues)} found that will break the build (${otherIssues} other ${pluralise('issue', otherIssues)} found)`, MESSAGE_TYPE.TITLE);
+      outputString(`Analysis summary: ${failIssues > 0 ? chalk.red(failIssues) : failIssues} ${pluralise('issue', failIssues)} found that will fail the build (${otherIssues} other ${pluralise('issue', otherIssues)} found)`, MESSAGE_TYPE.TITLE);
     } else {
       outputString(`Analysis summary: ${totalIssues} ${pluralise('issue', totalIssues)} found`, MESSAGE_TYPE.TITLE);
     }
 
     summary.forEach(function(summaryLine){
-      outputString(`  ${summaryLine.title} ${getCanFailStr(summaryLine.analyser)}`, MESSAGE_TYPE.INFO);
+      outputString(`  ${summaryLine.title} ${getCanFailStr(summaryLine.analyser, summaryLine.failIssues)}`, MESSAGE_TYPE.INFO);
       outputString('  ' + summaryLine.details + '\n', MESSAGE_TYPE.ERROR);
     });
 
-    function getCanFailStr(analyserName){
+    function getCanFailStr(analyserName, failIssues){
       if(command.ci && _.indexOf(canFail, analyserName) !== -1){
-        return `(will fail build)`;
+        if(failIssues > 0){
+          return `${chalk.red('(will fail build)')}`;
+        } else {
+          return `(will fail build)`;
+        }
       } else {
         return '';
       }

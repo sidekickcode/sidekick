@@ -149,5 +149,5 @@ usage: sidekick analysers [ --install ]
     
 Installation
 
-    With the --install flag, all available analysers will be installed.
+    With the --install flag, all available analysers will be installed (latest versions).
 `;

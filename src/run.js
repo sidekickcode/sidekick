@@ -54,7 +54,7 @@ module.exports = exports = function() {
             return doExit(1, "sidekick run must be run on a git repo");
           })
           .then(function createTarget(repoPath) {
-            return createGitTarget(command, repoPath)
+            return createGitTarget(command, repoPath, events)
           })
           .catch(fail)
           .then(function(target) {
@@ -72,7 +72,7 @@ module.exports = exports = function() {
     }, function(err){
       return doExit(1, "Cannot run analysis - unable to find git at: " + userSettings.getGitBin());
     });
-}
+};
 
 exports.flagsToCommand = flagsToCommand;
 
@@ -102,7 +102,6 @@ function flagsToCommand(path, argv) /*: { versus?: string, compare?: string, ci:
   if(!('ci' in argv) && cmd.travis) {
     cmd.ci = true;
   }
-
 
   return cmd;
 }
@@ -186,8 +185,8 @@ function runSession(session, command, events) {
   }
 }
 
-function createGitTarget(command, repoPath) {
-  command = travis(command)
+function createGitTarget(command, repoPath, events) {
+  command = travis(command, events);
   const validated = _.mapValues(_.pick(command, "versus", "compare"), validate);
 
   return Promise.props(validated)
@@ -223,7 +222,7 @@ function createGitTarget(command, repoPath) {
     }
   }
 
-  function travis(command) {
+  function travis(command, events) {
     if(!command.travis) {
       return command;
     }
@@ -232,10 +231,14 @@ function createGitTarget(command, repoPath) {
       // travis' commit range is '...' incorrectly - https://github.com/travis-ci/travis-ci/issues/4596
       const headBase = process.env.TRAVIS_COMMIT_RANGE.split(/\.{2,3}/);
 
+      events.emit("message", `Travis build. Determined commit comparison to be: ${headBase[0]} to ${headBase[1]}`);
+
       return _.defaults({
         compare: headBase[0],
         versus: headBase[1],
       }, command);
+    } else {
+      events.emit("message", `--travis build specified. Flag ignored because we don't appear to be running on TravisCi (no TRAVIS_COMMIT_RANGE env var)`);
     }
 
     return command;
@@ -289,7 +292,7 @@ CI
     on a config file, e.g. '.eslintrc', these settings will be used. If no config can be found, then the analyser will
     not run.
     
-    With --travis flag, sidekick will only analyse code that changed in PR etc (will set --ci if not set to false)
+    With --travis flag, sidekick will only analyse code that changed in PR etc (will set --ci to true if not explicitly set to false)
 
 Reporters
 
