@@ -21,11 +21,12 @@ commands.analysers = require("./analysers");
 commands.config = require("./config");
 
 const help = 
-`usage: sk <command> [ arg, ... ]
+`usage: sidekick <command> [ arg, ... ]
 
-  sidekick run [ some/repo/path ] [ --versus commitish ] [ --compare commitish (default: working copy) ] [ --reporter npmPackageName|absolutePath ] [ --no-ci-exit-code ]
+  sidekick run [ some/repo/path ] [ --versus commitish ] [ --compare commitish (default: working copy) ] [ --reporter npmPackageName|absolutePath ]  [ --ci ] [ --travis ] [ --no-ci-exit-code ]
 
-    runs sidekick in cli mode, reporting results via reporter. will exit with status code 1 if any isues are detected - disable this with --no-ci-exit-code
+    runs sidekick in cli mode, reporting results via reporter. will exit with status code 1 if any isues are detected 
+    - disable this with --no-ci-exit-code
 
     without a --versus, simply analyses all files in the repo. with --versus compares current working copy (i.e the files
     in the repo, commited or not) vs specified commit. With both --versus and --compare, will analyse changes
@@ -35,6 +36,14 @@ const help =
     sidekick run --versus head~5                       # working copy vs 5 commits ago
     sidekick run --compare HEAD --versus head~5        # current commit vs 5 commits ago
     sk run --travis                                    # travis integration - only analyses code that changed in PR etc (will set --ci if not set to false)
+
+    CI
+
+      With --ci flag, sidekick will install all analysers specified in your .sidekickrc file. If an analyser relies
+      on a config file, e.g. '.eslintrc', these settings will be used. If no config can be found, then the analyser will
+      not run.
+    
+    With --travis flag, sidekick will only analyse the files that changed in the commit that started the travis build.
 
   sidekick config [ --git ]
   

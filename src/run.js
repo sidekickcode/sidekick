@@ -216,7 +216,7 @@ function createGitTarget(command, repoPath) {
     if(commitish) {
       return git.parseCommitish(command.repoPath, commitish)
         .catch(function(e) {
-          return Error(`cannot parse '${commitish}' as commitsh value for '--${name}'`);
+          return Error(`cannot parse '${commitish}' as commitish value for '--${name}'`);
         });
     } else {
       return `missing value for '--${name}'`;
@@ -267,9 +267,9 @@ function fail(err) {
 }
 
 exports.help = `
-usage: sk run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --no-ci-exit-code ] [ --travis ]
+usage: sidekick run [ some/repo/path ] [ --versus commitish ] [ --compare commitish ] [ --reporter npmPackageName|absolutePath ] [ --ci ] [ --travis ] [ --no-ci-exit-code ]
 
-    Runs sk in cli mode, reporting results via reporter.
+    Runs sidekick in cli mode, reporting results via reporter.
 
 Compare and Versus
 
@@ -279,16 +279,17 @@ Compare and Versus
 
   Examples
 
-    sk run --versus origin/master                # working copy vs latest fetched commit from origin/master
-    sk run --versus head~5                       # working copy vs 5 commits ago
-    sk run --compare HEAD --versus head~5        # current commit vs 5 commits ago
-    sk run --travis                              # travis integration - only analyses code that changed in PR etc (will set --ci if not set to false)
+    sidekick run --versus origin/master                # working copy vs latest fetched commit from origin/master
+    sidekick run --versus head~5                       # working copy vs 5 commits ago
+    sidekick run --compare HEAD --versus head~5        # current commit vs 5 commits ago
 
 CI
 
-    With --ci flag, sk will install all analysers specified in your .sidekickrc file. If an analyser relies
-    on a config file, e.g. '.eslintrc', these settings will be used. If no config can be found then Sidekick
-    default settings will be used.
+    With --ci flag, sidekick will install all analysers specified in your .sidekickrc file. If an analyser relies
+    on a config file, e.g. '.eslintrc', these settings will be used. If no config can be found, then the analyser will
+    not run.
+    
+    With --travis flag, sidekick will only analyse code that changed in PR etc (will set --ci if not set to false)
 
 Reporters
 
