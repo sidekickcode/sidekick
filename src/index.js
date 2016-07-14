@@ -21,7 +21,8 @@ commands.analysers = require("./analysers");
 commands.config = require("./config");
 
 const help = 
-`usage: sidekick <command> [ arg, ... ]
+` 
+Usage: sidekick <command> [ arg, ... ]
 
   sidekick run [ some/repo/path ] [ --versus commitish ] [ --compare commitish (default: working copy) ] [ --reporter npmPackageName|absolutePath ]  [ --ci ] [ --travis ] [ --no-ci-exit-code ]
 
@@ -66,6 +67,9 @@ const help =
   sidekick version
 
     reports the version (also sidekick -v sidekick --version)
+    
+You can chat to us about sidekick at:  https://gitter.im/sidekickcode/support
+You can raise issues with sidekick at: https://github.com/sidekickcode/tracker/issues
 
 sidekick version ${VERSION}`;
 
