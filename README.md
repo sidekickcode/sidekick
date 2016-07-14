@@ -60,8 +60,29 @@ Will analyse just the changes that prompted the travis build.
 cd your/repo
 sidekick run
 ```
+
+or
+
+```sh
+sidekick run path/to/your/repo
+```
+
 This will evaluate the working copy of the repo's code on your machine.
+
 You can use `--compare` and `--versus` cli arguments to compare your working copy with other local or remote branches.
+
+###You can configure how sidekick analyses your files
+
+By default, we look at the contents of your repo and run analysers that we think will be useful, e.g. if we find
+JavaScript files, we will run a JavaScript TODO/FIXME finder, if we find a `package.json` file, we will run our
+`david-dm` analyser on your dependencies..
+
+You can add a `.sidekickrc` file to your repo to tell us what analysers you would like to run, and which ones can
+fail the build. To create a default `.sidekickrc` file:
+
+```sh
+sidekick init
+```
 
 ## GUI
 

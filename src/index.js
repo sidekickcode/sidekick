@@ -19,6 +19,7 @@ commands.help = helpCommand;
 commands.run = require("./run");
 commands.analysers = require("./analysers");
 commands.config = require("./config");
+commands.init = require('./init');
 
 const help = 
 ` 
@@ -58,6 +59,13 @@ Usage: sidekick <command> [ arg, ... ]
     
     with --install will install all available analysers
 
+  sidekick init
+  
+    Creates a .sidekickrc file in the git root of the current repo.
+    
+    If sidekick gui is installed, will open the gui to help configure the current repo.
+    Otherwise, it will create a .sidekickrc file for the current repo.
+    File is created after parsing the current repo to see what analysers could be helpful - use a text editor to change.
 
   sidekick help [ command ]
   sidekick command -h --help
