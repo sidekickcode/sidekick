@@ -71,6 +71,9 @@ function reporter(emitter, outputter, command) {
     function timeToRun(fileCount){
       var realCount = parseInt(fileCount / 3);  //takes about 300ms to do a job
       if(realCount < 20){
+        if(realCount < 1){
+          realCount = 1;  //less than 3 jobs
+        } 
         return `${realCount} ${pluralise('second', realCount)}`;
       } else if(realCount <=30) {
         return '30 seconds';
