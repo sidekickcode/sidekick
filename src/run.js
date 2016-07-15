@@ -166,7 +166,7 @@ function runSession(session, command, events) {
       });
     } else {
       // if running on CI and the analyser that found meta is marked as 'failCiOnError - fail the build
-      if(!command.ci || analyser.failCiOnError !== false) {
+      if(command.ci && analyser.failCiOnError === true) {
         heardIssues = heardIssues || issues.meta.length > 0;
       }
 
