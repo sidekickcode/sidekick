@@ -58,7 +58,7 @@ function reporter(emitter, outputter, command) {
       }, 0);
 
       if(jobCount === 0){
-        outputString(`No files that need to be analysed :-(`)
+        outputString(`No files that need to be analysed :-)`)
       } else {
         var jobStr = pluralise('job', jobCount);
         var timeStr = ` (should take about ${timeToRun(jobCount)})`;
