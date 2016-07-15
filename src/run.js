@@ -99,10 +99,9 @@ function flagsToCommand(path, argv) /*: { versus?: string, compare?: string, ci:
   cmd.ci = argv.ci;
   cmd.noCiExitCode = argv.noCiExitCode;
   cmd.travis = argv.travis;
-  if(!('ci' in argv) && cmd.travis) {
+  if(cmd.travis === true) {
     cmd.ci = true;
   }
-
   return cmd;
 }
 
