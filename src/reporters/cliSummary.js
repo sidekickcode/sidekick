@@ -73,12 +73,15 @@ function reporter(emitter, outputter, command) {
       if(realCount < 20){
         if(realCount < 1){
           realCount = 1;  //less than 3 jobs
-        } 
+        }
         return `${realCount} ${pluralise('second', realCount)}`;
       } else if(realCount <=30) {
         return '30 seconds';
       } else {
         var minutes = parseInt(Math.floor(realCount / 60));
+        if(minutes < 1){
+          minutes = 1;
+        }
         return `${minutes} ${pluralise('minute', minutes)}`;
       }
     }
