@@ -15,8 +15,7 @@ const fs = require('fs-extra');
 const yargs = require("yargs");
 
 const git = require('@sidekick/git-helpers');
-//const repoConfig = require('@sidekick/common/repoConfig');
-const repoConfig = require('../../common/repoConfig');
+const repoConfig = require('@sidekick/common/repoConfig');
 
 const reporters = Object.create(null);
 reporters["cli-summary"]  = require("./reporters/cliSummary");
