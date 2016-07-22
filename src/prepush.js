@@ -84,7 +84,7 @@ module.exports = exports = function() {
   function doExit(code, message, error) {
     log(`exiting with code '${code}' with msg '${message}' ` + (error ? error.stack : ""));
     if(message) {
-      outputError(message);
+      outputError(message + "\n");
     }
 
     process.exit(code);

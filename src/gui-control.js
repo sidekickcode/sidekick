@@ -30,10 +30,17 @@ function launch() {
 function devSpawn() {
   log('dev spawn of ui');
 
+  const skGuiPath = __dirname + "/../../sk-gui/build";
+
   return spawnWith('/usr/bin/env', [
     "npm", "run", "appDev"
   ], {
-    cwd: __dirname + "/../../../build",
+    cwd: skGuiPath,
+  })
+  .catch((e) => e.code === "ENOENT", function(e) {
+    const msg = `can't find sk-gui repo for dev launch at '${skGuiPath}': ${e.message}`;
+    log(msg);
+    throw Error(msg); 
   });
 }
 
