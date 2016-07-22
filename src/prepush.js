@@ -63,8 +63,6 @@ module.exports = exports = function() {
       return git.prepush(yargs.argv._.slice(1), stdinContents, cwd)
       .then(validateAndPrepare)
       .then(function(exitOrPush) {
-        console.log(exitOrPush);
-        
         if(exitOrPush instanceof Exit) {
           const exit = exitOrPush;
 
