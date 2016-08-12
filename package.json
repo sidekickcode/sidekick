@@ -44,6 +44,7 @@
     "proxytron": "^1.0.5",
     "rpcjs": "^1.1.0",
     "ttys": "0.0.3",
+    "uuid": "^2.0.2",
     "yargs": "4.3.2"
   },
   "devDependencies": {
