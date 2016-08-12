@@ -30,7 +30,7 @@ function launch() {
 function devSpawn() {
   log('dev spawn of ui');
 
-  const skGuiPath = __dirname + "/../../sk-gui/build";
+  const skGuiPath = __dirname + "/../../../sidekick/sk-deployed/build";
 
   return spawnWith('/usr/bin/env', [
     "npm", "run", "appDev"

@@ -74,7 +74,7 @@ function runUi(setup) {
   function init() {
     listenForEvents();
     listenForTerm();
-    renderAnalysis(state);
+    renderAnalysis();
     observePush();
     handleInput();
   }
@@ -104,6 +104,7 @@ function runUi(setup) {
   }
 
   function listenForEvents() {
+    log('listenForEvents');
     prepush.on("exitOptionallySkipping", exitOptionallySkipping);
     prepush.on("handOffToGui", handOff);
   }
@@ -132,6 +133,7 @@ function runUi(setup) {
 
   function observePush() {
 
+    log('observePush');
     const pushProcess = main.getActor(pushDefinition.id);
 
     pushProcess.once("started", function() {
@@ -169,7 +171,7 @@ function runUi(setup) {
       const updateProcess = main.getActor(update.id);
       updateProcess.on("progress", progress);
 
-      updateProcess.on("result", metaFound);
+      updateProcess.on("metaFound", metaFound);
 
       updateProcess.once("end", function() {
         log("heard end");
@@ -179,9 +181,7 @@ function runUi(setup) {
       });
 
       function progress(update) {
-        log("got update process");
         state.status = "started";
-
 
         state.total = update.total;
         // TODO kludge for analysed > total, which needs to be fixed upstream
@@ -190,8 +190,9 @@ function runUi(setup) {
       }
 
       function metaFound(meta) {
-        log("got meta");
-        state.issueCount++;
+        log(`got meta: ${JSON.stringify(meta)}`);
+        //FIXME - we are emitting meta from analysis_listener twice for each file!!
+        state.issueCount = state.issueCount + (meta.inModifiedLines / 2);
         renderAnalysis();
       }
     });
@@ -248,7 +249,7 @@ function runUi(setup) {
   }
 
 
-  function renderAnalysis(state) {
+  function renderAnalysis() {
     reset();
     writeLine(`${analysisStatusText()}`); //Sidekick started..
     writeLine(optionsText());             //(o) to open ui, (s) to skip
@@ -306,9 +307,13 @@ function runUi(setup) {
 
   function actionText() {
     //2 char indent to allow for icons
-    if(state.status === "unstarted") {
+    if(state.status === "unstarted" || state.status === 'waiting') {
       return `  ${green('All good so far')}.`;
-    } else {
+    } else if(state.status === "started") {
+        if(state.issuesInModifiedLines){
+          return `  ${yellow(state.issueCount + ' issues')} found in modified lines.`;
+        }
+    } else if(state.status === 'complete'){
       if(!state.issuesInModifiedLines){
         return `  ${state.success ? SUCCESS_TICK + " " : "  "}${green('All good')} - continuing with push.`;
       } else {
@@ -330,6 +335,7 @@ function runUi(setup) {
   }
 
   function listenForTerm() {
+    log('listenForTerm');
     cursor.on('SIGINT', function() {
       exit(1);
     })
