@@ -14,9 +14,7 @@ if(process.stdout.isTTY) {
 const readline = require("readline");
 const stdin = require("easy-stdin");
 const git = require("@sidekick/git-helpers");
-const RepoConfig = require("@sidekick/common/repoConfig");
 const chalk = require("chalk");
-const green = chalk.green;
 const EventEmitter = require("events").EventEmitter;
 
 const flow = require("./flow");
