@@ -38,7 +38,8 @@ module.exports = exports = function() {
   git.findRootGitRepo(process.cwd(), function(err, locationOfRepoRoot){
     if(err){
       log(`Unable to run init: ${err.message}`);
-      events.emit('message', `Unable to create .sidekickrc. Cannot find repo root.`);
+      const errMessage = `Unable to create .sidekickrc. Cannot find repo root, starting in: ${process.cwd()}`;
+      doExit(1, errMessage, err);
     }
 
     const configFileAbsPath = path.join(locationOfRepoRoot, CONFIG_FILE);
