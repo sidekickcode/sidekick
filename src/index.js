@@ -79,7 +79,8 @@ Usage: sidekick <command> [ arg, ... ]
 You can chat to us about sidekick at:  https://gitter.im/sidekickcode/support
 You can raise issues with sidekick at: https://github.com/sidekickcode/tracker/issues
 
-sidekick version ${VERSION}`;
+sidekick version ${VERSION}
+`;
 
 function run() {
   const cmd = yargs.argv._[0];
