@@ -32,6 +32,9 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
+# VScode
+.vscode/
+package-lock.json
 
 src/analysers/installed
 test/fixtures/analysers
