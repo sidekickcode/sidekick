@@ -17,8 +17,8 @@ function run(setup) {
 
   const api = new events.EventEmitter;
 
-  main.once(prefix + "end", function(err, pushResult) {
-    if(err) {
+  main.once(prefix + "end", function (err, pushResult) {
+    if (err) {
       console.error("error while running sidekick: " + err);
     } else {
       var output = textUi.banner([
@@ -35,12 +35,12 @@ function run(setup) {
     }
   });
 
-  prepush.on("exitOptionalSkipping", function(exit) {
+  prepush.on("exitOptionalSkipping", function (exit) {
     console.error(exit.message);
     api.emit("exit", exit.code);
   });
 
-  prepush.on("handOffToGui", function(event) {
+  prepush.on("handOffToGui", function (event) {
     console.log(event.message);
   });
 

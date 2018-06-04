@@ -2,7 +2,7 @@
  * creates a default .sidekickrc file for a repo.
  */
 "use strict";
-const path = require('path');
+const path = require("path");
 
 const log = require("debug")("cli:init");
 
@@ -10,12 +10,12 @@ const _ = require("lodash");
 
 const EventEmitter = require("events").EventEmitter;
 
-const fs = require('fs-extra');
+const fs = require("fs-extra");
 
 const yargs = require("yargs");
 
-const git = require('@sidekick/git-helpers');
-const repoConfig = require('@sidekick/common/repoConfig');
+const git = require("@sidekick/git-helpers");
+const repoConfig = require("@sidekick/common/repoConfig");
 
 const reporters = Object.create(null);
 reporters["cli-summary"]  = require("./reporters/cliSummary");
@@ -32,7 +32,7 @@ module.exports = exports = function() {
 
   reporter(events, null, command);
 
-  const CONFIG_FILE = '.sidekickrc';
+  const CONFIG_FILE = ".sidekickrc";
 
 
   git.findRootGitRepo(process.cwd(), function(err, locationOfRepoRoot){
@@ -46,16 +46,16 @@ module.exports = exports = function() {
 
     try {
       fs.statSync(configFileAbsPath);
-      events.emit('message', `${CONFIG_FILE} already exists for this repo at: ${locationOfRepoRoot}`)
+      events.emit("message", `${CONFIG_FILE} already exists for this repo at: ${locationOfRepoRoot}`);
     } catch(e) {
-      events.emit('message', `Creating default ${CONFIG_FILE} file..`);
+      events.emit("message", `Creating default ${CONFIG_FILE} file..`);
       repoConfig.load(locationOfRepoRoot)
         .then((RC) => {
           const defaultConfig = RC.getContents();
           log(`Default config: ${defaultConfig}`);
           fs.writeFileSync(configFileAbsPath, defaultConfig);
-          events.emit('message', `Created .sidekickrc file in ${locationOfRepoRoot}`);
-        })
+          events.emit("message", `Created .sidekickrc file in ${locationOfRepoRoot}`);
+        });
     }
   });
 };

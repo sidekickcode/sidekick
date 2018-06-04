@@ -22,7 +22,7 @@ var Promise = require("bluebird");
 module.exports = exports = Promise.method(spawner);
 
 function spawner(cmd, args, spawnOpts, opts) {
-  if(!opts || isNaN(opts.timeout)) {
+  if (!opts || isNaN(opts.timeout)) {
     throw new Error("requires opts.timeout in milliseconds");
   }
 
@@ -30,14 +30,14 @@ function spawner(cmd, args, spawnOpts, opts) {
     detached: true,
   });
 
-  var spawned = new Promise(function(resolve, reject) {
+  var spawned = new Promise(function (resolve, reject) {
     var child = spawn(cmd, args, spawnOptions);
 
-    if(opts.onCreate) {
+    if (opts.onCreate) {
       opts.onCreate(child);
     }
 
-    child.once("exit", function(code, signal) {
+    child.once("exit", function (code, signal) {
       var error = new Error("ChildExit");
       error.code = code;
       error.signal = signal;
@@ -49,8 +49,8 @@ function spawner(cmd, args, spawnOpts, opts) {
     var buf = "";
     child.stdout.on("data", listenForUp);
 
-    setTimeout(function() {
-      if(!spawned.isResolved()) {
+    setTimeout(function () {
+      if (!spawned.isResolved()) {
         fail(new Error("Timeout"));
       }
     }, opts.timeout);
@@ -62,22 +62,22 @@ function spawner(cmd, args, spawnOpts, opts) {
       buf += data;
 
       var nextLineIndex;
-      while(nextLineIndex = buf.indexOf("\n"), nextLineIndex !== -1) {
+      while (nextLineIndex = buf.indexOf("\n"), nextLineIndex !== -1) {
         var nextLine = buf.slice(0, nextLineIndex);
         var b4 = buf;
         buf = buf.slice(nextLineIndex + 1);
 
         try {
           var parsed = JSON.parse(nextLine);
-        } catch(e) {
+        } catch (e) {
           // not our line
           continue;
         }
 
-        if(parsed.up) {
+        if (parsed.up) {
           resolve(child);
           return;
-        } else if(parsed.error) {
+        } else if (parsed.error) {
           var error = new Error("ExplicitFailure");
           error.reason = parsed.error;
           fail(error);

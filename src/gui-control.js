@@ -20,28 +20,28 @@ exports.launch = launch;
 
 function launch() {
   return spawnApp()
-  .then(function(child) {
+    .then(function(child) {
     // we want to exit without gui exiting
-    child.unref();
-  });
+      child.unref();
+    });
 }
 
 
 function devSpawn() {
-  log('dev spawn of ui');
+  log("dev spawn of ui");
 
   const skGuiPath = __dirname + "/../../../sk-gui/build";
 
-  return spawnWith('/usr/bin/env', [
+  return spawnWith("/usr/bin/env", [
     "npm", "run", "appDev"
   ], {
     cwd: skGuiPath,
   })
-  .catch((e) => e.code === "ENOENT", function(e) {
-    const msg = `can't find sk-gui repo for dev launch at '${skGuiPath}': ${e.message}`;
-    log(msg);
-    throw Error(msg); 
-  });
+    .catch((e) => e.code === "ENOENT", function(e) {
+      const msg = `can't find sk-gui repo for dev launch at '${skGuiPath}': ${e.message}`;
+      log(msg);
+      throw Error(msg); 
+    });
 }
 
 function realSpawn() {
@@ -50,7 +50,7 @@ function realSpawn() {
 }
 
 function spawnWith(cmd, args, opts) {
-  var strippedEnv = _.omit(process.env, 'ELECTRON_RUN_AS_NODE');
+  var strippedEnv = _.omit(process.env, "ELECTRON_RUN_AS_NODE");
 
   return spawner(cmd, args, _.defaults(opts || {}, {
     // pass through our env - important so it can resolve node etc (in dev)
