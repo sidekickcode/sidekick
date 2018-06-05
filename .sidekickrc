@@ -20,7 +20,7 @@
             "failCiOnError": false
         },
         "sidekick-eslint": {
-            "failCiOnError": true
+            "failCiOnError": false
         }
       },
       "cs": {
