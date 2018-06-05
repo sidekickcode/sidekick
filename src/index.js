@@ -19,7 +19,7 @@ commands["pre-push"] = commands.prepush;
 commands.run = require("./run");
 commands.analysers = require("./analysers");
 commands.config = require("./config");
-commands.init = require('./init');
+commands.init = require("./init");
 
 const help = 
 ` 
@@ -86,7 +86,7 @@ function run() {
   const cmd = yargs.argv._[0];
   const fn = commands[cmd];
 
-  log('  ***  CLI STARTUP ***  ');
+  log("  ***  CLI STARTUP ***  ");
 
   tracking.start({
     version: VERSION,

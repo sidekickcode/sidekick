@@ -54,27 +54,27 @@ module.exports = exports = function() {
 
   function runPrepush(cwd, stdinContents) {
     git.findRootGitRepo(cwd)
-    .error(git.NotAGitRepo, function() {
-      doExit(1, "sidekick git hooks must be run in a git repo");
-    })
-    .then(function() {
-      return git.prepush(yargs.argv._.slice(1), stdinContents, cwd)
-      .then(validateAndPrepare)
-      .then(function(exitOrPush) {
-        if(exitOrPush instanceof Exit) {
-          const exit = exitOrPush;
+      .error(git.NotAGitRepo, function() {
+        doExit(1, "sidekick git hooks must be run in a git repo");
+      })
+      .then(function() {
+        return git.prepush(yargs.argv._.slice(1), stdinContents, cwd)
+          .then(validateAndPrepare)
+          .then(function(exitOrPush) {
+            if(exitOrPush instanceof Exit) {
+              const exit = exitOrPush;
 
-          if(exit.code === 0) {
-            return doExit(0, exit.message);
-          }
+              if(exit.code === 0) {
+                return doExit(0, exit.message);
+              }
 
-          exitOptionallySkipping(exit);
-        } else {
-          return prepush(exitOrPush);
-        }
-      });
-    })
-    .catch(fail)
+              exitOptionallySkipping(exit);
+            } else {
+              return prepush(exitOrPush);
+            }
+          });
+      })
+      .catch(fail);
   }
 
   function doExit(code, message, error) {
@@ -89,7 +89,7 @@ module.exports = exports = function() {
   function errorWithCode(code) {
     return function(err) {
       return err.code === code;
-    }
+    };
   }
 
   function validateAndPrepare(pushInfo) {
@@ -127,20 +127,20 @@ module.exports = exports = function() {
       }
 
       return git.branchTipContainsAncestorAsync(pushInfo.repoPath, { ancestor: target.remoteSha, tip: target.localSha })
-      .then(function(yes) {
-        if(!yes) {
-          return new Exit(1, "sidekick only supports fast-forward pushes - please merge with remote first");
-        }
-      });
+        .then(function(yes) {
+          if(!yes) {
+            return new Exit(1, "sidekick only supports fast-forward pushes - please merge with remote first");
+          }
+        });
     }
 
     function isPushingCurrentBranch() {
       return git.getCurrentBranch(pushInfo.repoPath)
-      .then(function(current) {
-        if(current !== target.localBranch) {
-          return new Exit(1, "sidekick currently only supports push from the current branch");
-        }
-      });
+        .then(function(current) {
+          if(current !== target.localBranch) {
+            return new Exit(1, "sidekick currently only supports push from the current branch");
+          }
+        });
     }
   }
 
@@ -150,7 +150,7 @@ module.exports = exports = function() {
   }
 
   function prepush(pushInfo) {
-    log('prepush: ' + JSON.stringify(pushInfo));
+    log("prepush: " + JSON.stringify(pushInfo));
 
     const id = uuid();
     const cmd = _.defaults({
@@ -205,11 +205,11 @@ module.exports = exports = function() {
         type: "pickComparisonTarget",
         push: cmd,
       })
-      .done(function() {
-        doExit(1);
-      }, function(err) {
-        exitOptionallySkipping(new Exit(1, "sidekick could not boot to pick comparison target"));
-      });
+        .done(function() {
+          doExit(1);
+        }, function(err) {
+          exitOptionallySkipping(new Exit(1, "sidekick could not boot to pick comparison target"));
+        });
     }
 
     function startAnalysis() {
@@ -219,7 +219,7 @@ module.exports = exports = function() {
       main.call({
         timeout: MAIN_TIMEOUT,
       }, "pushStart", cmd)
-      .catch(fail);
+        .catch(fail);
     }
   }
 

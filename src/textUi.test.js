@@ -1,12 +1,15 @@
 "use strict";
 
 var ui = require("./textUi");
+var chai = require("chai");
+var assert = chai.assert;
 
-describe('banners', function() {
 
-  it('makes banners', function() {
-    var expected = 
-`************************************************************
+describe("banners", function () {
+
+  it("makes banners", function () {
+    var expected =
+            `************************************************************
 *                                                          *
 *                       PUSH COMPLETE                      *
 *                                                          *
@@ -20,14 +23,14 @@ describe('banners', function() {
       "push handled in SidekickJS app - everything is ok :)",
     ], {
       width: 60,
-    })
+    });
 
     assert.equal(output, expected);
-  })
+  });
 
-  
-  it('handles real life use', function() {
-     var output = ui.banner([
+
+  it("handles real life use", function () {
+    var output = ui.banner([
       "PUSH COMPLETE",
       "Push completed successfully in SidekickJS app - everything is ok :)",
       "",
@@ -37,6 +40,6 @@ describe('banners', function() {
     });
 
     assert.match(output, /PUSH COMPLETE/);
-  })
-    
-})  
+  });
+
+});  

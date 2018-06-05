@@ -73,15 +73,15 @@ exports.acquire = function(opts) {
 
     function launchGui() {
       gui.launch()
-      .then(function() {
-        log("heard gui up");
-        connect();
-        reconnector.stop();
-      })
-      .catch(function(err) {
-        log("spawn fail", err);
-        throw new Error("CouldNotSpawnMain");
-      });
+        .then(function() {
+          log("heard gui up");
+          connect();
+          reconnector.stop();
+        })
+        .catch(function(err) {
+          log("spawn fail", err);
+          throw new Error("CouldNotSpawnMain");
+        });
     }
 
     function connect() {

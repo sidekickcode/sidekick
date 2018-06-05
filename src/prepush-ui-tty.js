@@ -33,7 +33,7 @@ const COMPLETE_MESSSAGE =
 
 function pushUi(setup) {
   // use tty module to ensure we end up with a tty in the slightly weird git hook environment
-  _.defaults(setup, { input: ttys.stdin, output: ttys.stdout })
+  _.defaults(setup, { input: ttys.stdin, output: ttys.stdout });
 
   setup.cursor = readline.createInterface(_.pick(setup, "input", "output"));
 
@@ -104,7 +104,7 @@ function runUi(setup) {
   }
 
   function listenForEvents() {
-    log('listenForEvents');
+    log("listenForEvents");
     prepush.on("exitOptionallySkipping", exitOptionallySkipping);
     prepush.on("handOffToGui", handOff);
   }
@@ -133,7 +133,7 @@ function runUi(setup) {
 
   function observePush() {
 
-    log('observePush');
+    log("observePush");
     const pushProcess = main.getActor(pushDefinition.id);
 
     pushProcess.once("started", function() {
@@ -177,7 +177,7 @@ function runUi(setup) {
         log("heard end");
         updateProcess.removeListener("progress", progress);
         state.status = "complete";
-        renderAnalysis()
+        renderAnalysis();
       });
 
       function progress(update) {
@@ -224,7 +224,7 @@ function runUi(setup) {
 
   function skipDueToFailure() {
     reset();
-    skipOrContinue(`${green('Sidekick')} analysis failed unexpectedly, push anyway?`);
+    skipOrContinue(`${green("Sidekick")} analysis failed unexpectedly, push anyway?`);
   }
 
   function renderUnclean() {
@@ -253,11 +253,11 @@ function runUi(setup) {
     reset();
     writeLine(`${analysisStatusText()}`); //Sidekick started..
     writeLine(optionsText());             //(o) to open ui, (s) to skip
-    writeLine(``);                        //
+    writeLine("");                        //
     writeLine(header());                  //  Analysis summary:
     writeLine(progressText());            //  2 of 12 files analysed
     writeLine(actionText());              //  issues found in modified lines
-    writeLine(``);                        //
+    writeLine("");                        //
     writeLine(footer());                  //Opening UI so you can fix..
   }
 
@@ -274,10 +274,10 @@ function runUi(setup) {
   }
 
   function progressText(){
-    if(state.status === 'started' || state.status === 'complete') {
+    if(state.status === "started" || state.status === "complete") {
       return `  ${state.analysed}/${state.total} modified files analysed.`;
     } else {
-      return '';
+      return "";
     }
 
   }
@@ -285,39 +285,39 @@ function runUi(setup) {
   function analysisStatusText() {
     switch(state.status) {
     case "waiting":
-    case "unstarted": return `${green('Sidekick')} starting up..`;
-    case "complete": return `${green('Sidekick')} finished.`;
-    case "started": return `${green('Sidekick')} running..`;
+    case "unstarted": return `${green("Sidekick")} starting up..`;
+    case "complete": return `${green("Sidekick")} finished.`;
+    case "started": return `${green("Sidekick")} running..`;
     default:
       throw new Error(`unknown state ${state.status}`);
     }
   }
 
   function header(){
-    return `  ${chalk.magenta('Analysis summary:')}`;
+    return `  ${chalk.magenta("Analysis summary:")}`;
   }
 
   function footer() {
     if(state.issuesInModifiedLines){
       return "Opening the UI so you can fix..";
     } else {
-      return '';
+      return "";
     }
   }
 
   function actionText() {
     //2 char indent to allow for icons
-    if(state.status === "unstarted" || state.status === 'waiting') {
-      return `  ${green('All good so far')}.`;
+    if(state.status === "unstarted" || state.status === "waiting") {
+      return `  ${green("All good so far")}.`;
     } else if(state.status === "started") {
-        if(state.issuesInModifiedLines){
-          return `  ${yellow(state.issueCount + ' issues')} found in modified lines.`;
-        }
-    } else if(state.status === 'complete'){
+      if(state.issuesInModifiedLines){
+        return `  ${yellow(state.issueCount + " issues")} found in modified lines.`;
+      }
+    } else if(state.status === "complete"){
       if(!state.issuesInModifiedLines){
-        return `  ${state.success ? SUCCESS_TICK + " " : "  "}${green('All good')} - continuing with push.`;
+        return `  ${state.success ? SUCCESS_TICK + " " : "  "}${green("All good")} - continuing with push.`;
       } else {
-        return `  ${yellow(state.issueCount + ' issues')} found in modified lines.`;
+        return `  ${yellow(state.issueCount + " issues")} found in modified lines.`;
       }
     }
   }
@@ -330,15 +330,15 @@ function runUi(setup) {
   }
 
   function writeLine(line) {
-    cursor.write(line + "\n")
+    cursor.write(line + "\n");
     lineDy += 1;
   }
 
   function listenForTerm() {
-    log('listenForTerm');
-    cursor.on('SIGINT', function() {
+    log("listenForTerm");
+    cursor.on("SIGINT", function() {
       exit(1);
-    })
+    });
   }
 
   function exit(code) {

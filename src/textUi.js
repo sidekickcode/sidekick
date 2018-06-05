@@ -15,26 +15,27 @@ function banner(paragraphs, opts) {
 
   var borderWidth = 1;
   var paddingWidth = 2;
-  
+
   var spaceForText = opts.width - (paddingWidth * 2) - (borderWidth * 2);
 
   // add top spacer row
   paragraphs = [""].concat(paragraphs);
 
-  var lines = _.transform(paragraphs, function(lines, para) {
-    if(spacerParagraph(para)) {
-      var rawLines = [""];
+  var lines = _.transform(paragraphs, function (lines, para) {
+    var rawLines = new Array();
+    if (spacerParagraph(para)) {
+      rawLines.push("");
     } else {
-      var rawLines = lineBreaks(spaceForText, para);
+      rawLines = lineBreaks(spaceForText, para);
       rawLines.push("");
     }
 
-    var formatted = _.map(rawLines, function(line) {
-      return `*  ${padAlign(line, spaceForText)}  *`; 
+    var formatted = _.map(rawLines, function (line) {
+      return `*  ${padAlign(line, spaceForText)}  *`;
     });
     [].push.apply(lines, formatted);
   }, []);
-   
+
   var verticalBorder = "*".repeat(opts.width);
   return verticalBorder + "\n" + lines.join("\n") + "\n" + verticalBorder;
 
@@ -46,7 +47,7 @@ function banner(paragraphs, opts) {
 
 
 function lineBreaks(availableWidth, text) {
-  if(text.length <= availableWidth) {
+  if (text.length <= availableWidth) {
     return [text];
   }
 
@@ -57,15 +58,16 @@ function lineBreaks(availableWidth, text) {
   var currentLineLength;
   initializeLine();
 
-  _.each(words, function(w) {
-    if(lineLength(w) > availableWidth) {
+  _.each(words, function (w) {
+    if (lineLength(w) > availableWidth) {
       initializeLine();
     }
-    line.push(w); 
+    line.push(w);
     currentLineLength += w.length;
   });
 
-  return _.invoke(lines, "join", " ");
+  return lines;
+  // return _.invoke(lines, "join", " ");
 
   function lineLength(nextWord) {
     // spaces including that required for next word (words - 1)
@@ -75,20 +77,20 @@ function lineBreaks(availableWidth, text) {
 
   function initializeLine() {
     currentLineLength = 0;
-    line = []; 
+    line = [];
     lines.push(line);
   }
 }
 
 function padAlign(str, w) {
-  if(str.length > w) {
+  if (str.length > w) {
     throw new Error("can't pad string over available width");
   }
 
   var paddingRight = (w - str.length) / 2;
   var paddingLeft;
 
-  if(paddingRight.toFixed(0) !== paddingRight.toString()) {
+  if (paddingRight.toFixed(0) !== paddingRight.toString()) {
     paddingRight = Math.floor(paddingRight);
     paddingLeft = paddingRight + 1;
   } else {

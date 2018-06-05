@@ -21,7 +21,7 @@ function reconnect(getStream, opts) {
     maxAttempts: 50,
   });
 
-  if(!opts.error) {
+  if (!opts.error) {
     throw new Error("must provide error handler");
   }
 
@@ -32,18 +32,18 @@ function reconnect(getStream, opts) {
   };
 
   function connect(error) {
-    if(stopped) {
+    if (stopped) {
       return;
     }
 
     // are we done on this connection attempt?
     var reconnecting = false;
 
-    if(reconnectNumber >= opts.maxAttempts) {
+    if (reconnectNumber >= opts.maxAttempts) {
       return opts.error(new Error("too-many-attempts"));
     }
 
-    getStream(error, reconnectNumber, function(newStream) {
+    getStream(error, reconnectNumber, function (newStream) {
       stream = newStream;
 
       stream.once("close", retry);
@@ -54,7 +54,7 @@ function reconnect(getStream, opts) {
     reconnectNumber += 1;
 
     function retry(err) {
-      if(reconnecting) {
+      if (reconnecting) {
         return;
       }
 

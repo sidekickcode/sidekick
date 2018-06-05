@@ -2,7 +2,7 @@
  * outputs status info.
  */
 "use strict";
-const path = require('path');
+const path = require("path");
 
 const log = require("debug")("cli:config");
 
@@ -31,12 +31,12 @@ module.exports = exports = function() {
 
   reporter(events, null, command);
 
-  const INSTALL_LOCATION = path.join(os.userDataPath(), '/installed_analysers');
+  const INSTALL_LOCATION = path.join(os.userDataPath(), "/installed_analysers");
   const AM = new analyserManager(INSTALL_LOCATION);
   
   if(command.git){
-    events.emit('message', `Setting git path to: ${command.git}`);
-    userSettings.setProperty('gitBin', command.git);
+    events.emit("message", `Setting git path to: ${command.git}`);
+    userSettings.setProperty("gitBin", command.git);
     userSettings.save();
   } else {
     //return config info
@@ -44,21 +44,21 @@ module.exports = exports = function() {
       .then(() => {
         userSettings.load();
         const installedAnalysers = AM.getAllInstalledAnalysers();
-        var output = `\nSidekick config settings:\n`;
-        events.emit('message', output);
+        var output = "\nSidekick config settings:\n";
+        events.emit("message", output);
 
-        output = `  Sidekick analysers installed: ${installedAnalysers.length > 0 ? 'OK' : 'NO (run \'sidekick analysers --install\' to install).'}`;
-        events.emit('message', output, installedAnalysers.length > 0 ? 'green' : 'yellow');
+        output = `  Sidekick analysers installed: ${installedAnalysers.length > 0 ? "OK" : "NO (run 'sidekick analysers --install' to install)."}`;
+        events.emit("message", output, installedAnalysers.length > 0 ? "green" : "yellow");
 
         userSettings.isGitReachable()
           .then(function(){
-            log('git found OK: ');
-            output = `  Sidekick can find git:        OK\n`;
-            events.emit('message', output, 'green');
+            log("git found OK: ");
+            output = "  Sidekick can find git:        OK\n";
+            events.emit("message", output, "green");
           }, function(err){
             log(`Cannot find git at: ${userSettings.getGitBin()}.`, err);
             output = `  Sidekick can find git:        NO (cannot find git at: ${userSettings.getGitBin()}).\n`;
-            events.emit('message', output, 'yellow');
+            events.emit("message", output, "yellow");
           });
       });
   }

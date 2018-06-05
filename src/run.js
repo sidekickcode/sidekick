@@ -7,13 +7,13 @@ const git = require("@sidekick/git-helpers");
 const log = require("debug")("cli:run");
 
 const _ = require("lodash");
-const Promise = require('bluebird');
+const Promise = require("bluebird");
 
 const EventEmitter = require("events").EventEmitter;
 
 const runner = require("@sidekick/runner");
 
-const userSettings = require('@sidekick/common/userSettings');
+const userSettings = require("@sidekick/common/userSettings");
 
 const yargs = require("yargs");
 
@@ -50,25 +50,25 @@ module.exports = exports = function() {
       git.setGitBin(userSettings.getGitBin());
 
       return git.findRootGitRepo(command.path)
-          .catch(git.NotAGitRepo, function() {
-            return doExit(1, "sidekick run must be run on a git repo");
-          })
-          .then(function createTarget(repoPath) {
-            return createGitTarget(command, repoPath, events)
-          })
-          .catch(fail)
-          .then(function(target) {
+        .catch(git.NotAGitRepo, function() {
+          return doExit(1, "sidekick run must be run on a git repo");
+        })
+        .then(function createTarget(repoPath) {
+          return createGitTarget(command, repoPath, events);
+        })
+        .catch(fail)
+        .then(function(target) {
 
-            log("starting analysis with %j", target);
+          log("starting analysis with %j", target);
 
-            return runner.session({
-              target: target,
-              shouldInstall: command.ci,
-              events: events,
-            })
+          return runner.session({
+            target: target,
+            shouldInstall: command.ci,
+            events: events,
+          });
 
-          })
-          .then((session) => runSession(session, command, events))
+        })
+        .then((session) => runSession(session, command, events));
     }, function(err){
       return doExit(1, "Cannot run analysis - unable to find git at: " + userSettings.getGitBin());
     });
@@ -131,7 +131,7 @@ function runSession(session, command, events) {
   const analysis = session.start();
 
   analysis.on("start", function(err, data) {
-    log('heard analysisStart');
+    log("heard analysisStart");
     events.emit("start", err, data, analysis);
   });
 
@@ -139,20 +139,20 @@ function runSession(session, command, events) {
 
   // when the session is finished, we have no more tasks schedules
   // and node should exit
-  process.on('exit', function(code) {
+  process.on("exit", function(code) {
     if(code !== 0) {
       // leave it as is, we're exiting as a result of failure elsewhere
       return;
     }
     const runExitCode = command.noCiExitCode ? 0
-                                      : (heardIssues ? 1 : 0);
+      : (heardIssues ? 1 : 0);
 
     log(`run changing process exit code to: ${runExitCode}, heardIssues ${heardIssues}, --no-ci-exit-code=${command.noCiExitCode}`);
     process.exit(runExitCode);
   });
 
   analysis.on("end", function() {
-    log('heard analysisEnd');
+    log("heard analysisEnd");
     events.emit("end");
   });
 
@@ -177,7 +177,7 @@ function runSession(session, command, events) {
         analyserDisplayName: analyser.displayName,
         analyserItemType: analyser.itemType,
         issues: issues.meta.map((i) => {
-          return _.defaults(_.omit(i, "analyser", "version", "location"), i.location)
+          return _.defaults(_.omit(i, "analyser", "version", "location"), i.location);
         }),
       });
     }
@@ -189,26 +189,26 @@ function createGitTarget(command, repoPath, events) {
   const validated = _.mapValues(_.pick(command, "versus", "compare"), validate);
 
   return Promise.props(validated)
-  .then(function(all) {
-    const invalid = _.transform(all, function(invalid, error, name) {
-      if(error instanceof Error) {
-        invalid[name] = error;
+    .then(function(all) {
+      const invalid = _.transform(all, function(invalid, error, name) {
+        if(error instanceof Error) {
+          invalid[name] = error;
+        }
+      });
+
+      if(_.isEmpty(invalid)) {
+      // extend command with head/base.
+        return {
+          type: "git",
+          path: repoPath,
+          compare: all.compare,
+          versus: all.versus,
+        };
+
+      } else {
+        return Promise.reject(Error(_.values(invalid).join(", and ")));
       }
     });
-
-    if(_.isEmpty(invalid)) {
-      // extend command with head/base.
-      return {
-        type: "git",
-        path: repoPath,
-        compare: all.compare,
-        versus: all.versus,
-      };
-
-    } else {
-      return Promise.reject(Error(_.values(invalid).join(", and ")));
-    }
-  });
 
   function validate(commitish, name) {
     if(commitish) {
@@ -237,7 +237,7 @@ function createGitTarget(command, repoPath, events) {
         versus: headBase[1],
       }, command);
     } else {
-      events.emit("message", `--travis build specified. Flag ignored because we don't appear to be running on TravisCi (no TRAVIS_COMMIT_RANGE env var)`);
+      events.emit("message", "--travis build specified. Flag ignored because we don't appear to be running on TravisCi (no TRAVIS_COMMIT_RANGE env var)");
     }
 
     return command;

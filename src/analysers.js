@@ -2,12 +2,12 @@
  * outputs information on the installed analysers in CLI mode.
  */
 "use strict";
-const path = require('path');
+const path = require("path");
 
 const log = require("debug")("cli:analysers");
 
 const _ = require("lodash");
-const Promise = require('bluebird');
+const Promise = require("bluebird");
 
 const EventEmitter = require("events").EventEmitter;
 
@@ -33,11 +33,11 @@ module.exports = exports = function() {
 
   reporter(events, null, command);
 
-  const INSTALL_LOCATION = path.join(os.userDataPath(), '/installed_analysers');
+  const INSTALL_LOCATION = path.join(os.userDataPath(), "/installed_analysers");
   const AM = new analyserManager(INSTALL_LOCATION);
 
   if(command.installAnalysers){
-    events.emit('message', 'Fetching list of analysers to install..');
+    events.emit("message", "Fetching list of analysers to install..");
 
     proxy({
       from: AM,
@@ -52,44 +52,44 @@ module.exports = exports = function() {
 
     AM.init()
       .then(() => {
-        log('analysers: ' + JSON.stringify(_.values(AM.ALL_ANALYSERS)));
+        log("analysers: " + JSON.stringify(_.values(AM.ALL_ANALYSERS)));
         const analyserList = getAllAnalysers(_.values(AM.ALL_ANALYSERS));
-        log('analysers: ' + JSON.stringify(analyserList));
-        events.emit('message', `Found ${analyserList.length} analysers to install.\n`);
+        log("analysers: " + JSON.stringify(analyserList));
+        events.emit("message", `Found ${analyserList.length} analysers to install.\n`);
         Promise.all(_.map(analyserList, (analyser) => {
-          log('installing analyser: ' + JSON.stringify(analyser));
+          log("installing analyser: " + JSON.stringify(analyser));
           return AM.installAnalyser(analyser, true); //force install of latest
         }))
           .then(() => {
-            events.emit('message', '\nInstalled all analysers.');
-          })
+            events.emit("message", "\nInstalled all analysers.");
+          });
       });
   } else {
-    log('fetching analyser list');
+    log("fetching analyser list");
     AM.init()
       .then(() => {
         //return list of installed analysers
         const allInstalledAnalysers = AM.getAllInstalledAnalysers();
-        log('have installed analysers: ' + JSON.stringify(allInstalledAnalysers));
-        const analyserList = allInstalledAnalysers.join('\n  ');
-        events.emit('message', `\nWe found ${allInstalledAnalysers.length} installed analysers:\n\n  ${analyserList}\n`);
+        log("have installed analysers: " + JSON.stringify(allInstalledAnalysers));
+        const analyserList = allInstalledAnalysers.join("\n  ");
+        events.emit("message", `\nWe found ${allInstalledAnalysers.length} installed analysers:\n\n  ${analyserList}\n`);
       });
   }
 
   function getAllAnalysers(analyserConfigs){
     return _.map(analyserConfigs, function(analyserConfig){
-      log('analyserConfig: ' + JSON.stringify(analyserConfig));
+      log("analyserConfig: " + JSON.stringify(analyserConfig));
       return {name: analyserConfig.config.analyser,
-        version: 'latest'}
-    })
+        version: "latest"};
+    });
   }
 
 };
 
 function parseInput() /*: { install?: boolean } */ {
   const argv = yargs
-      .boolean("install")
-      .argv;
+    .boolean("install")
+    .argv;
 
   const cmd = {
     installAnalysers : argv.install,
