@@ -90,7 +90,6 @@ sidekick init
 Sidekick also has a git pre-push hook and a GUI that helps you fix your issues before they are pushed to a remote repo.
  
 This GUI is in beta at the moment.
-Please go to [our web site](https://sidekickcode.com) to sign up for the beta.
 
 If you want to get support then we have a [chat room](https://gitter.im/sidekickcode/support).
 If you want to raise issues then you can do so [here](https://github.com/sidekickcode/tracker/issues).
